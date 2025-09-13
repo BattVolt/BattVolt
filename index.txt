@@ -16,7 +16,7 @@ Contact Us
 
 <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
 
-+(123) 1234-567-8901
++91 8650938539
 
 Get a quote
 <ion-icon name="arrow-forward" aria-hidden="true"></ion-icon>
@@ -69,19 +69,20 @@ Zero contact travel
 We love our customers and we love the way they come.
 
 <ion-icon name="document-text-outline"></ion-icon>
-No Driving License
+No fossil fuels
 
 <ion-icon name="checkmark-circle" aria-hidden="true"></ion-icon>
-Detachable battery, take home and charge in 3 hours.
+Reliable energy storage to power your home, day and night,ensuring uninterrupted comfort.
 
 
-Enjoy a hassle-free ride by charging just for 3 hours.
+High-Performance Battery Solutions for the
+Future of Mobility
 
 Read More
 <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
 
 
-
+ 
 #---------- STATS ----------#
 
 650m

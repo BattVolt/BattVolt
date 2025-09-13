@@ -1,748 +1,1189 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BattVolt | Advanced Lithium-Ion Battery Solutions</title>
+    <link rel="icon" href="https://lh3.googleusercontent.com/d/1bMKufxBdZa2NCsfeGyEhX7g7SO9HXKXe">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-green': '#4CAF50', // New Green from Image
+                        'dark-bg': '#111827',
+                        'dark-card': '#1F2937',
+                        'light-bg': '#F9FAFB',
+                        'light-card': '#FFFFFF',
+                    },
+                    animation: {
+                        'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
+                        'slide-in': 'slide-in 0.5s ease-out forwards',
+                        'pulse-glow': 'pulse-glow 2s infinite ease-in-out',
+                    },
+                    keyframes: {
+                        'fade-in-up': {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(76, 175, 80, 0.4)' },
+                            '50%': { boxShadow: '0 0 35px rgba(76, 175, 80, 0.7)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Styles for a premium feel */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1F2937; }
+        ::-webkit-scrollbar-thumb { background: #4B5563; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6B7280; }
+        html { scroll-behavior: smooth; }
 
-  <!-- 
-    - primary meta tags
-  -->
-  <title>battVolt - Make Your Personal PowerBnk</title>
-  <meta name="title" content="BattVolt - Make Your Personal PowerBank">
-  <meta name="description" content="“Powering Tomorrow with Advanced Lithium-Ion Solutions – Reliable, Sustainable, and Cutting-Edge Energy Storage for a Brighter Future.”">
+        /* --- ENHANCED NAVIGATION --- */
+        .nav-link { position: relative; transition: color 0.3s; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 50%; transform: translateX(-50%); background-color: #4CAF50; transition: width 0.3s ease-in-out; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        .dropdown:hover .dropdown-menu { display: block; animation: fade-in-up 0.3s ease-out forwards; }
 
-  <!-- 
-    - favicon
-  -->
-  <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
+        #battery-canvas { width: 100%; height: 100%; cursor: grab; }
+        #battery-canvas:grabbing { cursor: grabbing; }
+        
+        /* --- HOME SECTION GLOW --- */
+        #home {
+            position: relative;
+            overflow: hidden;
+        }
+        #home::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translate(25%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.15) 0%, rgba(249, 250, 251, 0) 60%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .dark #home::before {
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.2) 0%, rgba(17, 24, 39, 0) 60%);
+        }
 
-  <!-- 
-    - custom css link
-  -->
-  <link rel="stylesheet" href="./assets/css/style.css">
+        .section-title { font-size: 2.5rem; font-weight: 800; text-align: center; margin-bottom: 1.5rem; position: relative; display: inline-block; }
+        .section-title::after { content: ''; position: absolute; width: 60%; height: 4px; border-radius: 2px; bottom: -10px; left: 20%; background: #4CAF50; }
+        .product-card { transition: transform 0.3s, box-shadow 0.3s; }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); }
+        .specs-container {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .specs-visible {
+            max-height: 200px; /* Adjust if more specs are added */
+            opacity: 1;
+            margin-top: 1rem;
+        }
 
-  <!-- 
-    - custom font link
-  -->
-  <link rel="stylesheet" href="./assets/font/font.css">
+        /* --- CHATBOT & SCROLL TO TOP --- */
+        #chatbot-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; }
+        #chatbot-toggle { background: #4CAF50; transition: transform 0.3s, box-shadow 0.3s; }
+        #chatbot-toggle:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(76, 175, 80, 0.5); }
+        #chatbot-window { transform-origin: bottom right; transition: transform 0.3s ease-out, opacity 0.3s ease-out; }
+        .hidden-chat { transform: scale(0); opacity: 0; }
+        #scroll-to-top { position: fixed; bottom: 6.5rem; right: 2rem; z-index: 999; transition: opacity 0.3s, transform 0.3s; }
+        
+        /* --- SCROLL ANIMATIONS --- */
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        
+        /* --- SYMBOL ANIMATIONS --- */
+        @keyframes electric-jitter { 0%, 100% { transform: translate(0, 0); } 10%, 40%, 70% { transform: translate(-1px, 1px); } 20%, 50%, 80% { transform: translate(1px, -1px); } }
+        .effect-voltage { animation: electric-jitter 1.5s infinite linear; }
+        .effect-current .graph-line { stroke-dasharray: 100; stroke-dashoffset: 100; animation: draw-current 3s infinite ease-in-out; }
+        @keyframes draw-current { to { stroke-dashoffset: 0; } }
+        @keyframes charge-pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 6px #4CAF50); } }
+        .effect-cell .cell-charge { transform-origin: center; animation: charge-pulse 1.8s infinite ease-in-out; }
+        @keyframes download-arrow { 0%, 100% { transform: translateY(-2px); opacity: 0; } 50%, 80% { transform: translateY(5px); opacity: 1; } }
+        .effect-ota .arrow { animation: download-arrow 2.2s infinite ease-out; }
 
-  <!-- 
-    - preload images
-  -->
-  <link rel="preload" as="image" href="./assets/images/loading.svg">
-  <link rel="preload" as="image" href="./assets/images/loading-circle.svg">
-  <link rel="preload" as="image" href="./assets/images/hero-banner.png">
+        /* 5. Real-time Tracking (UPDATED FOR HOVER EFFECT) */
+        .effect-tracking-wrapper { position: relative; }
+        .effect-tracking-wrapper::before, .effect-tracking-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background-color: rgba(76, 175, 80, 0.7);
+            transform-origin: center;
+            transform: translate(-50%, -50%) scale(0.1);
+            opacity: 0;
+            z-index: -1;
+        }
+        .group:hover .effect-tracking-wrapper::before, .group:hover .effect-tracking-wrapper::after {
+            animation: ping-tracking 2s infinite ease-out;
+        }
+        .group:hover .effect-tracking-wrapper::after {
+            animation-delay: 1s;
+        }
+        @keyframes ping-tracking {
+            0% { transform: translate(-50%, -50%) scale(0.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+        
+        /* 6. Data Logging (UPDATED) */
+        @keyframes clock-spin-minute { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes clock-spin-hour { from { transform: rotate(0deg); } to { transform: rotate(30deg); } }
+        .effect-datalog .datalog-minute-hand { transform-origin: 8px 17px; animation: clock-spin-minute 5s linear infinite; }
+        .effect-datalog .datalog-hour-hand { transform-origin: 8px 17px; animation: clock-spin-hour 60s linear infinite; }
+        @keyframes communicate { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+        .effect-comm { animation: communicate 3s infinite ease-in-out; }
+        @keyframes sweep-needle { 0%, 100% { transform: rotate(-45deg); } 50% { transform: rotate(45deg); } }
+        .effect-soc .needle { transform-origin: 12px 15px; animation: sweep-needle 3s infinite ease-in-out; }
+    
+        /* --- Battery Loader Animation --- */
+        .battery-loader {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .battery-outline {
+            width: 28px;
+            height: 14px;
+            border: 2px solid #9ca3af; /* gray-400 */
+            border-radius: 4px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 2px;
+        }
+        .dark .battery-outline {
+            border-color: #6b7280; /* dark:gray-500 */
+        }
+        .battery-outline::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 2px;
+            width: 3px;
+            height: 8px;
+            background: #9ca3af; /* gray-400 */
+            border-radius: 0 2px 2px 0;
+        }
+        .dark .battery-outline::after {
+             background: #6b7280; /* dark:gray-500 */
+        }
+        .battery-charge {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            gap: 1px;
+        }
+        .battery-bar {
+            flex-grow: 1;
+            height: 100%;
+            background-color: #e5e7eb; /* gray-200 */
+            opacity: 0;
+            animation: charge 1.6s infinite;
+        }
+        .dark .battery-bar {
+            background-color: #4b5563; /* dark:gray-600 */
+        }
+        .battery-bar:nth-child(1) { animation-delay: 0.0s; }
+        .battery-bar:nth-child(2) { animation-delay: 0.4s; }
+        .battery-bar:nth-child(3) { animation-delay: 0.8s; }
+        .battery-bar:nth-child(4) { animation-delay: 1.2s; }
 
+        @keyframes charge {
+            0%, 100% {
+                opacity: 0;
+            }
+            30%, 80% {
+                opacity: 1;
+            }
+            40% { background-color: #ef4444; } /* red-500 */
+            60% { background-color: #f59e0b; } /* amber-500 */
+            80% { background-color: #4CAF50; } /* brand-green */
+        }
+    </style>
 </head>
+<body class="bg-light-bg dark:bg-dark-bg text-gray-800 dark:text-gray-200 font-sans antialiased">
 
-<body id="top">
-
-  <!-- 
-    - #PRELOADER
-  -->
-
-  <div class=" preload-box" data-preloader>
-    <img src="./assets/images/loading.svg" width="45" height="45" alt="loading">
-
-    <img src="./assets/images/loading-circle.svg" width="75" height="75" alt="loading" class="preload-circle">
-  </div>
-
-
-
-
-
-  <!-- 
-    - #HEADER
-  -->
-
-  <header class="header" data-header style="background-color: white;">
-    <div class="container">
-
-      <a href="#" class="logo">
-        <img src="./assets/images/Logoo.svg" width="120" height="30" alt="volti home">
-      </a>
-
-      <nav class="navbar" data-navbar>
-        <ul class="navbar-list">
-
-          <li class="navbar-item">
-            <a href="#" class="navbar-link">Home</a>
-          </li>
-
-          <!-- <li class="navbar-item">
-            <a href="#" class="navbar-link">Services</a>
-          </li>
-
-          <li class="navbar-item">
-            <a href="#" class="navbar-link">Gallery</a>
-          </li>
-
-          <li class="navbar-item">
-            <a href="#" class="navbar-link">Blog</a>
-          </li> -->
-
-          <li class="navbar-item">
-            <a href="#" class="navbar-link">Contact Us</a>
-          </li>
-
-        </ul>
-      </nav>
-
-      <div class="header-action">
-
-        <a href="tel:+12312345678901" class="contact-number">
-          <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
-
-          <span class="span">+91 8650938639</span>
-        </a>
-
-        <a href="#" class="btn btn-primary">
-          <span class="span">Get a quote</span>
-
-          <ion-icon name="arrow-forward" aria-hidden="true"></ion-icon>
-        </a>
-
-      </div>
-
-      <button class="nav-toggle-btn" aria-label="toggle menu" data-nav-toggler>
-        <ion-icon name="menu-outline" aria-hidden="true" class="open"></ion-icon>
-        <ion-icon name="close-outline" aria-hidden="true" class="close"></ion-icon>
-      </button>
-
-    </div>
-  </header>
-
-
-
-
-
-  <main>
-    <article>
-
-      <!-- 
-        - #HERO
-      -->
-
-      <section class="section hero" aria-label="home">
-        <div class="container">
-
-          <div class="hero-content" data-reveal="left">
-
-            <h1 class="h1 hero-title">
-              Make Your <span class="span">Personal</span> PowerBank.
-            </h1>
-
-            <ul class="hero-list">
-
-              <li>
-                <div class="hero-card">
-                  <ion-icon name="speedometer-outline" aria-hidden="true"></ion-icon>
-
-                  <p class="card-subtitle">Top speed</p>
-
-                  <p class="card-title">80 km/h</p>
-                </div>
-              </li>
-
-              <li>
-                <div class="hero-card">
-                  <ion-icon name="stopwatch-outline" aria-hidden="true"></ion-icon>
-
-                  <p class="card-subtitle">0-40 km/hr in</p>
-
-                  <p class="card-title">3.3 sec</p>
-                </div>
-              </li>
-
-              <li>
-                <div class="hero-card">
-                  <ion-icon name="speedometer-outline" aria-hidden="true"></ion-icon>
-
-                  <p class="card-subtitle">Certified Range</p>
-
-                  <p class="card-title">116 km</p>
-                </div>
-              </li>
-
-            </ul>
-
-            <a href="#" class="btn btn-primary">
-              <span class="span">Book Now</span>
-
-              <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+    <!-- Header & Navigation -->
+    <header class="bg-light-card/80 dark:bg-dark-card/80 backdrop-blur-sm sticky top-0 z-50 shadow-md transition-transform duration-300 ease-in-out">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-2">
+                <img src="https://lh3.googleusercontent.com/d/1FcJei54jNhrbJ2PIPMnWpOnfY7oWiN3p" alt="BattVolt Logo" class="h-6 w-auto">
             </a>
-
-          </div>
-
-          <figure class="hero-banner" data-reveal="right">
-            <img src="./assets/images/Heroo.svg" width="1116" height="766" alt="Bike" class="w-100">
-          </figure>
-
-        </div>
-      </section>
-
-
-
-
-
-      <!-- 
-        - #ABOUT
-      -->
-
-      <section class="section about" aria-labelledby="about-label">
-        <div class="container">
-
-          <figure class="about-banner" data-reveal="left">
-            <img src="./assets/images/i1.svg" width="380" height="382" loading="lazy" alt="about banner"
-              class="w-100 img-1">
-
-            <!-- <img src="./assets/images/about-banner-2.jpg" width="347" height="349" loading="lazy" alt="about banner"
-              class="w-100 img-2"> -->
-          </figure>
-
-          <div class="about-content" data-reveal="right">
-
-            <p class="section-subtitle has-before" id="about-label">What We Do!</p>
-
-            <h2 class="h2 section-title">
-              Our mission is to put an electric vehicle charge
-            </h2>
-
-            <p class="section-text">
-              Charge your electric vehicle at home using one of our smart home char ge solutions or gain access to over
-              3,000 public charging.
-            </p>
-
-            <div class="about-wrapper">
-
-              <div class="about-card">
-
-                <div class="title-wrapper">
-                  <ion-icon name="bonfire-outline" aria-hidden="true"></ion-icon>
-
-                  <h3 class="card-title">Zero contact travel</h3>
+            <div class="hidden md:flex items-center space-x-8" id="main-nav">
+                <a href="#home" class="nav-link">Home</a>
+                 <div class="relative dropdown">
+                    <button class="nav-link flex items-center">Core Technology</button>
+                    <div class="dropdown-menu absolute hidden bg-light-card dark:bg-dark-card shadow-lg rounded-lg mt-2 py-2 w-60">
+                         <a href="#technology" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">High Voltage Systems</a>
+                         <a href="#technology" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Stable Current Delivery</a>
+                         <a href="#technology" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Advanced Lithium Cells</a>
+                         <a href="#technology" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Over-the-Air Updates</a>
+                    </div>
                 </div>
+                 <div class="relative dropdown">
+                    <button class="nav-link flex items-center">Product</button>
+                    <div class="dropdown-menu absolute hidden bg-light-card dark:bg-dark-card shadow-lg rounded-lg mt-2 py-2 w-60">
+                        <a href="#products" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Two-Wheeler Series</a>
+                        <a href="#products" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Three-Wheeler Series</a>
+                        <a href="#products" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Home Storage Solutions</a>
+                        <a href="#products" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">Custom Solutions</a>
+                    </div>
+                </div>
+                <a href="#solution" class="nav-link">Solution</a>
+                <a href="#spotlight" class="nav-link">Spotlight</a>
+                <a href="#careers" class="nav-link">Careers</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                    <svg id="theme-icon-light" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    <svg id="theme-icon-dark" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                </button>
+                <button class="md:hidden" id="mobile-menu-button">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 space-y-2">
+             <a href="#home" class="block nav-link">Home</a>
+             <a href="#technology" class="block nav-link">Core Technology</a>
+             <a href="#products" class="block nav-link">Product</a>
+             <a href="#solution" class="block nav-link">Solution</a>
+             <a href="#spotlight" class="block nav-link">Spotlight</a>
+             <a href="#careers" class="block nav-link">Careers</a>
+             <a href="#contact" class="block nav-link">Contact</a>
+        </div>
+    </header>
 
-                <p class="card-text">
-                  We love our customers and we love the way they come.
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="container mx-auto px-6 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center min-h-screen">
+            <div class="animate-fade-in-up">
+                <h1 class="text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
+                    High-Performance Battery Solutions for the<br>
+                    <span class="text-brand-green">Future of Mobility</span>
+                </h1>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+                    At BattVolt, we engineer and manufacture advanced lithium-ion battery packs that power the next generation of electric vehicles.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#products" class="bg-brand-green text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-brand-green/90 transition-transform duration-300 transform hover:scale-105">Explore Products</a>
+                    <a href="#technology" class="bg-transparent border-2 border-gray-800 dark:border-gray-200 text-gray-800 dark:text-gray-200 font-bold py-3 px-6 rounded-lg hover:bg-gray-800 hover:text-white dark:hover:bg-gray-200 dark:hover:text-gray-800 transition-colors duration-300">Our Technology</a>
+                </div>
+            </div>
+            <div class="h-96 md:h-[500px] animate-fade-in-up flex flex-col items-center justify-center" style="animation-delay: 0.3s;">
+                <div id="battery-container" class="w-full h-full">
+                    <canvas id="battery-canvas"></canvas>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Click and drag to rotate the model</p>
+            </div>
+        </section>
+
+        <!-- Core Technology Section -->
+        <section id="technology" class="py-20 bg-light-bg dark:bg-dark-bg">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title reveal">Core Technology</h2>
+                <p class="mt-10 mb-12 max-w-3xl mx-auto text-gray-600 dark:text-gray-400 reveal">
+                    Our success is built on a foundation of superior engineering. We focus on these key pillars to deliver unparalleled quality, intelligence, and reliability.
+                </p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center group reveal">
+                        <svg class="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400 group-hover:text-brand-green transition-colors effect-voltage" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <h3 class="font-bold text-lg mb-2 tech-title">High Voltage Systems</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 tech-description">Maximum power output for superior vehicle performance and acceleration.</p>
+                        <button class="explain-btn mt-4 text-sm text-brand-green font-semibold py-1 px-3 rounded-full bg-brand-green/10 hover:bg-brand-green/20 transition">✨ Explain Simply</button>
+                    </div>
+                     <div class="bg-light-card dark:bg-dark-card p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center group reveal">
+                        <svg class="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400 group-hover:text-brand-green transition-colors effect-current" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path class="graph-line" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l5-5 4 4 8-8"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 7h4v4"></path>
+                        </svg>
+                        <h3 class="font-bold text-lg mb-2 tech-title">Stable Current Delivery</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 tech-description">Advanced BMS for stable, consistent current, ensuring optimal efficiency and battery life.</p>
+                        <button class="explain-btn mt-4 text-sm text-brand-green font-semibold py-1 px-3 rounded-full bg-brand-green/10 hover:bg-brand-green/20 transition">✨ Explain Simply</button>
+                    </div>
+                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center group reveal">
+                        <svg class="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400 group-hover:text-brand-green transition-colors effect-cell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="8" width="18" height="11" rx="1"></rect>
+                            <rect x="7" y="5" width="2" height="3"></rect>
+                            <rect x="15" y="5" width="2" height="3"></rect>
+                            <path d="M8 13.5h2M15 12.5h2m-1-1v2"></path>
+                            <path class="cell-charge" d="M12 9l-1 3h2l-1 3"></path>
+                        </svg>
+                        <h3 class="font-bold text-lg mb-2 tech-title">Advanced Lithium Cells</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 tech-description">Highest-grade cells for maximum energy density, safety, and operational lifespan.</p>
+                        <button class="explain-btn mt-4 text-sm text-brand-green font-semibold py-1 px-3 rounded-full bg-brand-green/10 hover:bg-brand-green/20 transition">✨ Explain Simply</button>
+                    </div>
+                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center group reveal">
+                        <svg class="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400 group-hover:text-brand-green transition-colors effect-ota" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9" />
+                           <path class="arrow" d="M12 11v6m0 0l-3-3m3 3l3-3" />
+                        </svg>
+                        <h3 class="font-bold text-lg mb-2 tech-title">Over-the-Air Updates</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 tech-description">Seamlessly update firmware with the latest features, ensuring peak performance.</p>
+                        <button class="explain-btn mt-4 text-sm text-brand-green font-semibold py-1 px-3 rounded-full bg-brand-green/10 hover:bg-brand-green/20 transition">✨ Explain Simply</button>
+                    </div>
+                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center group reveal">
+                        <div class="w-12 h-12 mb-4 effect-tracking-wrapper flex items-center justify-center">
+                            <svg class="w-full h-full text-gray-500 dark:text-gray-400 group-hover:text-brand-green transition-colors z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2 tech-title">Real-time Tracking</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 tech-description">Integrated GPS for precise battery location, enhancing security and fleet management.</p>
+                        <button class="explain-btn mt-4 text-sm text-brand-green font-semibold py-1 px-3 rounded-full bg-brand-green/10 hover:bg-brand-green/20 transition">✨ Explain Simply</button>
+                    </div>
+                     <div class="bg-light-card dark:bg-dark-card p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center group reveal">
+                        <svg class="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400 group-hover:text-brand-green transition-colors effect-datalog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <g class="clock-overlay">
+                                <circle cx="8" cy="17" r="4"></circle>
+                                <path class="datalog-hour-hand" d="M8 17l1.5 -1"></path>
+                                <path class="datalog-minute-hand" d="M8 17v-2"></path>
+                            </g>
+                        </svg>
+                        <h3 class="font-bold text-lg mb-2 tech-title">Advanced Data Logging</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 tech-description">Continuous logging of vital data for diagnostics, maintenance, and optimization.</p>
+                        <button class="explain-btn mt-4 text-sm text-brand-green font-semibold py-1 px-3 rounded-full bg-brand-green/10 hover:bg-brand-green/20 transition">✨ Explain Simply</button>
+                    </div>
+                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center group reveal">
+                        <svg class="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400 group-hover:text-brand-green transition-colors effect-comm" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                        <h3 class="font-bold text-lg mb-2 tech-title">Versatile Communication</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 tech-description">Supports UART, CAN & RS485 for seamless integration with vehicle control systems.</p>
+                        <button class="explain-btn mt-4 text-sm text-brand-green font-semibold py-1 px-3 rounded-full bg-brand-green/10 hover:bg-brand-green/20 transition">✨ Explain Simply</button>
+                    </div>
+                    <div class="bg-light-card dark:bg-dark-card p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col items-center group reveal">
+                        <svg class="w-12 h-12 mb-4 text-gray-500 dark:text-gray-400 group-hover:text-brand-green transition-colors effect-soc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M5 15A7 7 0 1 1 19 15" />
+                           <path class="needle" d="M12 15 V9" />
+                        </svg>
+                        <h3 class="font-bold text-lg mb-2 tech-title">SOC Estimation</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 tech-description">Observe Voltage, Current, State of Charge, and SOC % independently on the display.</p>
+                        <button class="explain-btn mt-4 text-sm text-brand-green font-semibold py-1 px-3 rounded-full bg-brand-green/10 hover:bg-brand-green/20 transition">✨ Explain Simply</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Section -->
+        <section id="products" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="section-title reveal">Our Products</h2>
+                <p class="mt-10 mb-12 max-w-3xl mx-auto text-gray-600 dark:text-gray-400 text-center reveal">
+                    Engineered for excellence. Discover our range of battery solutions designed for various applications.
+                </p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Product Card 1 -->
+                    <div class="product-card bg-light-card dark:bg-dark-card rounded-lg overflow-hidden shadow-lg reveal">
+                        <img src="https://placehold.co/600x400/111827/4CAF50?text=E-Scooter" alt="Two-Wheeler Battery" class="w-full h-48 object-cover">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2">Two-Wheeler Series</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4 flex-grow">Compact, high-power batteries to keep your ride smooth and efficient.</p>
+                            <div class="specs-container">
+                                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                                    <li><strong>Voltage:</strong> 48V / 60V / 72V</li>
+                                    <li><strong>Capacity:</strong> 25Ah - 40Ah</li>
+                                    <li><strong>Chemistry:</strong> NMC / LFP</li>
+                                    <li><strong>Cycle Life:</strong> >1500 Cycles</li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto pt-4 space-y-2">
+                                <button class="view-specs-btn w-full text-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">View Specs</button>
+                                <a href="https://wa.me/918899131217?text=Hi, I'm interested in the Two-Wheeler Series batteries." target="_blank" class="w-full text-center bg-brand-green text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-green/90 transition block">Get Price</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Product Card 2 -->
+                    <div class="product-card bg-light-card dark:bg-dark-card rounded-lg overflow-hidden shadow-lg reveal">
+                        <img src="https://placehold.co/600x400/111827/4CAF50?text=E-Rickshaw" alt="Three-Wheeler Battery" class="w-full h-48 object-cover">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2">Three-Wheeler Series</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4 flex-grow">Durable and long-lasting power for commercial and passenger three-wheelers.</p>
+                             <div class="specs-container">
+                                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                                    <li><strong>Voltage:</strong> 48V / 51.2V</li>
+                                    <li><strong>Capacity:</strong> 80Ah - 120Ah</li>
+                                    <li><strong>Peak Current:</strong> 150A</li>
+                                    <li><strong>Chemistry:</strong> LFP (High Durability)</li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto pt-4 space-y-2">
+                                <button class="view-specs-btn w-full text-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">View Specs</button>
+                                <a href="https://wa.me/918899131217?text=Hi, I'm interested in the Three-Wheeler Series batteries." target="_blank" class="w-full text-center bg-brand-green text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-green/90 transition block">Get Price</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Product Card 3 -->
+                    <div class="product-card bg-light-card dark:bg-dark-card rounded-lg overflow-hidden shadow-lg reveal">
+                        <img src="https://placehold.co/600x400/111827/4CAF50?text=Home+Power" alt="Home Storage Battery" class="w-full h-48 object-cover">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2">Home Storage Solutions</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4 flex-grow">"Reliable energy storage to power your home, day and night,ensuring uninterrupted comfort.</p>
+                            <div class="specs-container">
+                                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                                    <li><strong>Capacity:</strong> 5kWh - 20kWh</li>
+                                    <li><strong>Output Power:</strong> 3kW - 10kW</li>
+                                    <li><strong>Scalability:</strong> Modular Design</li>
+                                    <li><strong>Chemistry:</strong> LFP (Safe & Long-life)</li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto pt-4 space-y-2">
+                                <button class="view-specs-btn w-full text-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">View Specs</button>
+                                <a href="https://wa.me/918899131217?text=Hi, I'm interested in the Home Storage Solutions." target="_blank" class="w-full text-center bg-brand-green text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-green/90 transition block">Get Price</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Product Card 4 -->
+                    <div class="product-card bg-light-card dark:bg-dark-card rounded-lg overflow-hidden shadow-lg reveal">
+                        <img src="https://placehold.co/600x400/111827/4CAF50?text=Custom+Build" alt="Custom Battery Solution" class="w-full h-48 object-cover">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-bold mb-2">Custom Solutions</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4 flex-grow">Tailor-made battery packs to meet your unique and specific requirements.</p>
+                             <div class="specs-container">
+                                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+                                    <li><strong>Voltage:</strong> Custom (12V-400V)</li>
+                                    <li><strong>Capacity:</strong> As per requirement</li>
+                                    <li><strong>Form Factor:</strong> Custom Enclosure</li>
+                                    <li><strong>BMS Features:</strong> Custom Logic</li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto pt-4 space-y-2">
+                                <button class="view-specs-btn w-full text-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">View Specs</button>
+                                <a href="https://wa.me/918899131217?text=Hi, I'm interested in a Custom Solution." target="_blank" class="w-full text-center bg-brand-green text-white font-semibold py-2 px-4 rounded-lg hover:bg-brand-green/90 transition block">Get Price</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution Section -->
+        <section id="solution" class="py-20 bg-light-bg dark:bg-dark-bg">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="section-title flex items-center justify-center reveal">
+                    <svg class="w-10 h-10 mr-3 text-brand-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.293 2.293a1 1 0 010 1.414L11 15l-4 6h10l-4-6 4.707-4.707a1 1 0 011.414 0L19 9m-5 8v4m-2-2h4"></path></svg>
+                    BattVolt-Powered Solution Consultant
+                </h2>
+                <p class="mt-10 mb-12 max-w-3xl mx-auto text-gray-600 dark:text-gray-400 reveal">
+                    Describe your project or vehicle, and our AI consultant will analyze your needs and recommend the perfect BattVolt battery solution.
                 </p>
 
-              </div>
-
-              <div class="about-card">
-
-                <div class="title-wrapper">
-                  <ion-icon name="document-text-outline" aria-hidden="true"></ion-icon>
-
-                  <h3 class="card-title">No Driving License</h3>
+                <div class="bg-light-card dark:bg-dark-card p-8 rounded-xl shadow-2xl mt-12 max-w-5xl mx-auto text-left reveal">
+                    <div class="grid md:grid-cols-2 gap-8 items-start">
+                        <!-- Input Column -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold">1. Describe Your Requirements:</h3>
+                            <textarea id="solution-input" rows="8" class="w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-3 focus:ring-brand-green focus:border-brand-green" placeholder="e.g., 'I need a battery for a delivery e-scooter used for long distances in a hilly city.'"></textarea>
+                            <button id="ask-gemini-solution" class="w-full flex items-center justify-center bg-brand-green text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:bg-brand-green/90 transition text-lg">
+                                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                Ask BattVolt for a Solution
+                            </button>
+                        </div>
+                        <!-- Output Column -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold">2. Recommended Solution:</h3>
+                            <div id="solution-output" class="w-full h-full min-h-[200px] bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-4 text-gray-600 dark:text-gray-400 prose dark:prose-invert max-w-none">
+                                Your AI-powered recommendation will appear here.
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </section>
 
-                <p class="card-text">
-                  We love our customers and we love the way they come.
+        <!-- Spotlight Section -->
+        <section id="spotlight" class="py-20">
+             <div class="container mx-auto px-6">
+                 <h2 class="section-title reveal">Spotlight</h2>
+                 <p class="mt-10 mb-12 max-w-3xl mx-auto text-gray-600 dark:text-gray-400 text-center reveal">
+                     Stay updated with our latest news, insights, and achievements in the industry.
+                 </p>
+                 <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-light-card dark:bg-dark-card p-8 rounded-xl shadow-md reveal">
+                        <h3 class="text-2xl font-bold mb-3">In the News</h3>
+                        <p class="text-gray-600 dark:text-gray-400">BattVolt featured in Automotive Weekly for its breakthrough in battery efficiency.</p>
+                        <a href="#" class="text-brand-green font-semibold mt-4 inline-block">Read More &rarr;</a>
+                    </div>
+                    <div class="bg-light-card dark:bg-dark-card p-8 rounded-xl shadow-md reveal">
+                        <h3 class="text-2xl font-bold mb-3">From Our Blog</h3>
+                        <p class="text-gray-600 dark:text-gray-400">"The Future of EV Batteries: Beyond Lithium-Ion" - A deep dive by our CTO Anuj Kumar, .</p>
+                        <a href="#" class="text-brand-green font-semibold mt-4 inline-block">Read More &rarr;</a>
+                    </div>
+                    <div class="bg-light-card dark:bg-dark-card p-8 rounded-xl shadow-md reveal">
+                        <h3 class="text-2xl font-bold mb-3">Recognition</h3>
+                        <p class="text-gray-600 dark:text-gray-400">Awarded "Most Innovative Energy Solution 2025" at the National Energy Summit.</p>
+                        <a href="#" class="text-brand-green font-semibold mt-4 inline-block">Learn More &rarr;</a>
+                    </div>
+                 </div>
+             </div>
+        </section>
+
+        <!-- Careers Section -->
+        <section id="careers" class="py-20 bg-light-bg dark:bg-dark-bg">
+            <div class="container mx-auto px-6">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="reveal">
+                        <h2 class="section-title text-left" style="left:0; transform:none; text-align:left;">Join Our Team</h2>
+                        <p class="mt-10 text-gray-600 dark:text-gray-400">
+                            We're always looking for passionate and talented individuals to join our mission of revolutionizing the energy sector. If you're ready to make an impact, we'd love to hear from you.
+                        </p>
+                    </div>
+                    <div id="career-form-container" class="bg-light-card dark:bg-dark-card p-8 rounded-xl shadow-2xl reveal">
+                        <h3 class="text-2xl font-bold mb-6">Apply Now</h3>
+                        <form id="career-form">
+                            <div class="mb-4">
+                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
+                                <input type="text" name="name" id="name" class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-2 focus:ring-brand-green focus:border-brand-green" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                                <input type="email" name="email" id="email" class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-2 focus:ring-brand-green focus:border-brand-green" required>
+                            </div>
+                             <div class="mb-4">
+                                <label for="resume" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Resume/CV Link (Optional)</label>
+                                <input type="text" name="resume" id="resume" placeholder="e.g., Google Drive, Dropbox, LinkedIn" class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-2 focus:ring-brand-green focus:border-brand-green">
+                            </div>
+                            <div class="mb-6">
+                                <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>
+                                <textarea name="message" id="message" rows="4" class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-2 focus:ring-brand-green focus:border-brand-green" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-brand-green text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:bg-brand-green/90 transition">Submit Application</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <!-- Contact Section -->
+        <section id="contact" class="py-20">
+            <div class="container mx-auto px-6 max-w-4xl text-center">
+                 <h2 class="text-4xl md:text-5xl font-extrabold mb-4 reveal">Let's Power Your Next Project</h2>
+                 <p class="mb-12 max-w-2xl mx-auto text-gray-600 dark:text-gray-400 reveal">
+                    Ready to discuss your requirements? Our team is here to help you find the perfect energy solution.
                 </p>
 
-              </div>
-
+                <div id="contact-form-container" class="bg-light-card dark:bg-dark-card p-8 rounded-xl shadow-2xl text-left reveal">
+                     <form id="contact-form">
+                         <div class="grid md:grid-cols-2 gap-6 mb-6">
+                             <div>
+                                 <label for="contact-name" class="sr-only">Your Name</label>
+                                 <input type="text" name="name" id="contact-name" placeholder="Your Name" class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-3 focus:ring-brand-green focus:border-brand-green" required>
+                             </div>
+                             <div>
+                                 <label for="contact-email" class="sr-only">Your Email</label>
+                                 <input type="email" name="email" id="contact-email" placeholder="Your Email" class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-3 focus:ring-brand-green focus:border-brand-green" required>
+                             </div>
+                         </div>
+                         <div class="mb-6">
+                             <label for="contact-message" class="sr-only">Your Message</label>
+                            <textarea name="message" id="contact-message" rows="6" placeholder="Your Message" class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-3 focus:ring-brand-green focus:border-brand-green" required></textarea>
+                         </div>
+                         <button type="submit" class="w-full bg-brand-green text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:bg-brand-green/90 transition text-lg">Send Message</button>
+                     </form>
+                </div>
+                 <div class="mt-12 text-center text-gray-600 dark:text-gray-400 reveal">
+                     <p class="mb-2"><strong>Phone:</strong> +91 86509 38639</p>
+                     <p class="mb-2"><strong>Email:</strong> contact@batt-volt.com</p>
+                     <p><strong>Address:</strong> Dhampur City, Bijnor, Uttar Pradesh - 246761</p>
+                 </div>
             </div>
+        </section>
+    </main>
 
-            <ul class="about-list">
-
-              <li class="about-item">
-                <ion-icon name="checkmark-circle" aria-hidden="true"></ion-icon>
-
-                <span class="span">Detachable battery, take home and charge in 3 hours.</span>
-              </li>
-
-              <li class="about-item">
-                <ion-icon name="checkmark-circle" aria-hidden="true"></ion-icon>
-
-                <span class="span">Enjoy a hassle-free ride by charging just for 3 hours.</span>
-              </li>
-
-            </ul>
-
-            <a href="#" class="btn btn-primary">
-              <span class="span">Read More</span>
-
-              <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
-            </a>
-
-          </div>
-
-        </div>
-      </section>
-
-
-
-
-
-      <!-- 
-        - #STATS
-      -->
-
-      <section class="section stats" aria-label="statistics">
-        <div class="container">
-
-          <ul class="stats-list" data-reveal>
-
-            <li class="stats-card">
-              <h3 class="h3 card-title">650m</h3>
-
-              <p class="card-text">
-                Check charge status remotely through Ether app
-              </p>
-            </li>
-
-            <li class="stats-card">
-              <h3 class="h3 card-title">564+</h3>
-
-              <p class="card-text">
-                Check charge status remotely through Ether app
-              </p>
-            </li>
-
-            <li class="stats-card">
-              <h3 class="h3 card-title">125k</h3>
-
-              <p class="card-text">
-                Check charge status remotely through Ether app
-              </p>
-            </li>
-
-          </ul>
-
-          <div class="stats-banner" data-reveal>
-            <img src="./assets/images/stats-banner.jpg" width="1398" height="565" loading="lazy" alt="video banner"
-              class="img-cover">
-
-            <button class="play-btn" aria-label="play video">
-              <ion-icon name="play" aria-hidden="true"></ion-icon>
-            </button>
-          </div>
-
-        </div>
-      </section>
-
-
-
-
-
-      <!-- 
-        - #SERVICE
-      -->
-
-      <section class="section service" aria-labelledby="service-label">
-        <div class="container">
-
-          <p class="section-subtitle has-before" id="service-label" data-reveal>What We Do!</p>
-
-          <h2 class="h2 section-title" data-reveal>
-            What Advantages Will You Get Using An Escooter?
-          </h2>
-
-          <div class="wrapper">
-
-            <ul class="service-list" data-reveal="left">
-
-              <li class="service-item">
-                <div>
-                  <h3 class="h5 card-title">Recoverable Energy</h3>
-
-                  <p class="card-text">
-                    Charge Your Electric Vehicle At Home Using One Of Our Smart.
-                  </p>
+    <!-- Gemini Explanation Modal -->
+    <div id="explanation-modal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-[1001] hidden opacity-0 transition-opacity duration-300">
+        <div id="explanation-modal-content" class="bg-light-card dark:bg-dark-card rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-95 opacity-0">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modal-title" class="text-2xl font-bold text-gray-800 dark:text-gray-200"></h3>
+                    <button id="modal-close-btn" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
                 </div>
-
-                <div class="card-icon">
-                  <ion-icon name="car-outline" aria-hidden="true"></ion-icon>
+                <div id="modal-body" class="text-gray-600 dark:text-gray-400 prose dark:prose-invert max-w-none min-h-[100px]">
+                    <!-- Gemini's explanation will go here -->
                 </div>
-              </li>
-
-              <li class="service-item">
-                <div>
-                  <h3 class="h5 card-title">Quick Installation</h3>
-
-                  <p class="card-text">
-                    Charge Your Electric Vehicle At Home Using One Of Our Smart.
-                  </p>
-                </div>
-
-                <div class="card-icon">
-                  <ion-icon name="compass-outline" aria-hidden="true"></ion-icon>
-                </div>
-              </li>
-
-              <li class="service-item">
-                <div>
-                  <h3 class="h5 card-title">Zero Contact Travel</h3>
-
-                  <p class="card-text">
-                    Charge Your Electric Vehicle At Home Using One Of Our Smart.
-                  </p>
-                </div>
-
-                <div class="card-icon">
-                  <ion-icon name="bonfire-outline" aria-hidden="true"></ion-icon>
-                </div>
-              </li>
-
-            </ul>
-
-            <figure class="service-banner img-holder" style="--width: 806; --height: 510;">
-              <img src="./assets/images/Battery.svg" width="806" height="510" loading="lazy" alt="service banner"
-                class="img-cover">
-            </figure>
-
-            <ul class="service-list" data-reveal="right">
-
-              <li class="service-item">
-                <div class="card-icon">
-                  <ion-icon name="car-outline" aria-hidden="true"></ion-icon>
-                </div>
-
-                <div>
-                  <h3 class="h5 card-title">Recoverable Energy</h3>
-
-                  <p class="card-text">
-                    Charge Your Electric Vehicle At Home Using One Of Our Smart.
-                  </p>
-                </div>
-              </li>
-
-              <li class="service-item">
-                <div class="card-icon">
-                  <ion-icon name="compass-outline" aria-hidden="true"></ion-icon>
-                </div>
-
-                <div>
-                  <h3 class="h5 card-title">Quick Installation</h3>
-
-                  <p class="card-text">
-                    Charge Your Electric Vehicle At Home Using One Of Our Smart.
-                  </p>
-                </div>
-              </li>
-
-              <li class="service-item">
-                <div class="card-icon">
-                  <ion-icon name="bonfire-outline" aria-hidden="true"></ion-icon>
-                </div>
-
-                <div>
-                  <h3 class="h5 card-title">Zero Contact Travel</h3>
-
-                  <p class="card-text">
-                    Charge Your Electric Vehicle At Home Using One Of Our Smart.
-                  </p>
-                </div>
-              </li>
-
-            </ul>
-
-          </div>
-
-        </div>
-      </section>
-
-
-
-
-
-      <!-- 
-        - #CTA
-      -->
-
-      <section class="cta">
-        <div class="container">
-
-          <div class="cta-card" data-reveal="left">
-
-            <div>
-              <h2 class="h1 card-title">Designed for the our roads.</h2>
-
-              <p class="card-text">
-                Consectetur adipiscing elit sed do tempor labor dolore magna aliqua quis suspendisse.
-              </p>
             </div>
-
-            <a href="#" class="btn btn-primary">
-              <span class="span">Book Now</span>
-
-              <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
-            </a>
-
-          </div>
-
-          <figure class="cta-banner" data-reveal="right">
-            <img src="./assets/images/cta-banner.jpg" width="330" height="206" loading="lazy" alt="cta banner"
-              class="img-cover">
-          </figure>
-
         </div>
-      </section>
-
-
-
-
-
-      <!-- 
-        - #BLOG
-      -->
-
-     
-
-      <!-- 
-        - #CONTACT
-      -->
-
-      <section class="contact" aria-label="contact" data-reveal="right">
-        <div class="container">
-
-          <ul class="contact-list">
-
-            <li>
-              <div class="contact-card">
-                <div class="card-icon">
-                  <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
-                </div>
-
-                <div>
-                  <h3 class="h6">Hot Line</h3>
-
-                  <a href="tel:+01123457890" class="card-subtitle">+91 86509 38639</a>
-                </div>
-              </div>
-            </li>
-
-            <li>
-              <div class="contact-card">
-                <div class="card-icon">
-                  <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
-                </div>
-
-                <div>
-                  <h3 class="h6">E-mail Address</h3>
-
-                  <a href="mailto:contact@batt-volt.com" class="card-subtitle">contact@batt-volt.com</a>
-                </div>
-              </div>
-            </li>
-
-            <li>
-              <div class="contact-card">
-                <div class="card-icon">
-                  <ion-icon name="compass-outline" aria-hidden="true"></ion-icon>
-                </div>
-
-                <div>
-                  <h3 class="h6">Our Location</h3>
-
-                  <address class="card-subtitle">Dhampue City,Uttar Pradesh-246761</address>
-                </div>
-              </div>
-            </li>
-
-          </ul>
-
-        </div>
-      </section>
-
-    </article>
-  </main>
-
-
-
-
-
-  <!-- 
-    - #FOOTER
-  -->
-
-  <footer class="footer">
-    <div class="container">
-
-      <div class="footer-top section" data-reveal>
-
-        <!-- <div class="newsletter-card">
-
-          <div class="card-icon">
-            <ion-icon name="mail-unread-outline" aria-hidden="true"></ion-icon>
-          </div>
-
-          <h3 class="h3 card-title">Sign up for Electric Car,news & inslights</h3>
-
-          <form action="#" class="newsletter-form">
-
-            <label for="email" class="label">Email address</label>
-
-            <input type="emal" name="email" id="email" placeholder="Email address" required class="email-field">
-
-            <button type="submit" class="btn btn-primary">Subscribe</button>
-
-          </form>
-
-        </div> -->
-
-        <div class="footer-list">
-
-          <p class="h6 has-after">What is BattVolt</p>
-
-          <p class="footer-text">
-            “Powering Tomorrow with Advanced Lithium-Ion Solutions – Reliable, Sustainable, and Cutting-Edge Energy Storage for a Brighter Future.”
-          </p>
-
-          <a href="#" class="btn-outline">
-            <span class="span">Get a quote</span>
-
-            <ion-icon name="arrow-forward-outline" aria-hidden="true"></ion-icon>
-          </a>
-
-        </div>
-
-        <ul class="footer-list">
-
-          <li>
-            <p class="h6 has-after">Company Info</p>
-          </li>
-
-          <li>
-            <a href="#" class="footer-link">About Us</a>
-          </li>
-
-          <li>
-            <a href="#" class="footer-link">Our Projects</a>
-          </li>
-
-          <li>
-            <a href="#" class="footer-link">Meet Our Team</a>
-          </li>
-
-          <li>
-            <a href="#" class="footer-link">News & Media</a>
-          </li>
-
-          <li>
-            <a href="#" class="footer-link">Contact Us</a>
-          </li>
-
-          <li>
-            <a href="#" class="footer-link">Careers</a>
-          </li>
-
-        </ul>
-
-        <ul class="footer-list">
-
-          <li>
-            <p class="h6 has-after">Quick Contact</p>
-          </li>
-
-          <li>
-            <address class="footer-text">
-              Dhampur City,Bijnor,Uttar Pradesh-246761              .
-            </address>
-          </li>
-
-          <li>
-            <p class="footer-text">
-              If you have any questions or need help, feel free to contact with our team.
-            </p>
-          </li>
-
-          <li>
-            <a href="tel:00201061245741" class="contact-link">+91 86509 38639</a>
-          </li>
-
-        </ul>
-
-      </div>
-
-      <div class="footer-bottom">
-
-        <div>
-          <ul class="footer-bottom-list">
-
-            <li>
-              <a href="#" class="footer-bottom-link">Where to Find Us</a>
-            </li>
-
-            <li>
-              <a href="#" class="footer-bottom-link">Terms of Payment</a>
-            </li>
-
-            <li>
-              <a href="#" class="footer-bottom-link">Stats Element</a>
-            </li>
-
-          </ul>
-
-          <p class="copyright">Made with love @BattVolt</p>
-        </div>
-
-        <img src="./assets/images/footer-logo.svg" width="100" height="63" loading="lazy" alt="Volti home">
-
-        <ul class="social-list">
-
-          <li>
-            <a href="#" class="social-link">
-              <ion-icon name="logo-facebook" aria-hidden="true"></ion-icon>
-            </a>
-          </li>
-
-          <li>
-            <a href="#" class="social-link">
-              <ion-icon name="logo-twitter" aria-hidden="true"></ion-icon>
-            </a>
-          </li>
-
-          <li>
-            <a href="#" class="social-link">
-              <ion-icon name="logo-youtube" aria-hidden="true"></ion-icon>
-            </a>
-          </li>
-
-          <li>
-            <a href="#" class="social-link">
-              <ion-icon name="logo-linkedin" aria-hidden="true"></ion-icon>
-            </a>
-          </li>
-
-        </ul>
-
-      </div>
-
     </div>
-  </footer>
+    
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" class="opacity-0 transform translate-y-4 bg-brand-green/80 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center backdrop-blur-sm hover:bg-brand-green transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+    </button>
+    
+    <!-- AI Chatbot -->
+    <div id="chatbot-container">
+        <div id="chatbot-window" class="hidden-chat fixed bottom-24 right-8 w-80 h-[28rem] bg-light-card dark:bg-dark-card rounded-xl shadow-2xl flex flex-col">
+            <div class="p-4 bg-brand-green text-white rounded-t-xl">
+                <h3 class="font-bold text-lg">BattVolt AI Assistant</h3>
+                <p class="text-sm opacity-90">How can I help you today?</p>
+            </div>
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
+                 <div class="flex">
+                     <div class="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg max-w-xs">
+                         <p class="text-sm">Welcome! Ask me about products, tech, or anything else.</p>
+                     </div>
+                 </div>
+            </div>
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex space-x-2">
+                    <input type="text" id="chat-input" placeholder="Type your message..." class="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 focus:ring-brand-green focus:border-brand-green text-sm">
+                    <button id="chat-send" class="bg-brand-green text-white p-2 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button id="chatbot-toggle" class="w-16 h-16 rounded-full text-white shadow-lg flex items-center justify-center">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark-card text-gray-300">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                <div>
+                    <p>&copy; <span id="current-year"></span> BattVolt Private Limited. All Rights Reserved.</p>
+                    <p class="text-sm text-gray-500"></p>
+                </div>
+                <div class="flex mt-4 md:mt-0 space-x-6">
+                    <a href="#" class="hover:text-brand-green transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg></a>
+                    <a href="#" class="hover:text-brand-green transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a>
+                    <a href="#" class="hover:text-brand-green transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path></svg></a>
+                    <a href="#" class="hover:text-brand-green transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.338 16.338H13.67V12.16c0-.996-.017-2.277-1.387-2.277-1.389 0-1.601 1.086-1.601 2.206v4.249H8.014V8h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.71zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.338 8.905H4.002V8h2.673v8.338zM20.337 20.337H3.662V3.662h16.675v16.675zM22 22H2V2h20v20z"></path></svg></a>
+                    <a href="#" class="hover:text-brand-green transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.585-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.585-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.07-1.645-.07-4.85s.012-3.585.07-4.85c.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.358-.2 6.78-2.618 6.98-6.98.059-1.281.073-1.689.073-4.948s-.014-3.667-.072-4.947c-.2-4.358-2.618-6.78-6.98-6.98C15.667.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z" clip-rule="evenodd" /></svg></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Dynamic Year for Footer ---
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // --- Theme Toggler ---
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIconLight = document.getElementById('theme-icon-light');
+    const themeIconDark = document.getElementById('theme-icon-dark');
+    const docElement = document.documentElement;
+
+    const applyTheme = (theme) => {
+        if (theme === 'dark') {
+            docElement.classList.add('dark');
+            themeIconLight.classList.remove('hidden');
+            themeIconDark.classList.add('hidden');
+        } else {
+            docElement.classList.remove('dark');
+            themeIconLight.classList.add('hidden');
+            themeIconDark.classList.remove('hidden');
+        }
+    };
+
+    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    applyTheme(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+        const newTheme = docElement.classList.contains('dark') ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+    });
+    
+    // --- Mobile Menu ---
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // --- Hide Header on Scroll ---
+    const header = document.querySelector('header');
+    let lastScrollTop = 0;
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > lastScrollTop && scrollTop > header.offsetHeight) {
+            // Scrolling Down
+            header.classList.add('-translate-y-full');
+        } else {
+            // Scrolling Up
+            header.classList.remove('-translate-y-full');
+        }
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; 
+    });
 
 
+    // --- 3D Battery Model ---
+    let scene, camera, renderer, batteryGroup;
+    let isDragging = false; 
+    
+    function init3DModel() {
+        const container = document.getElementById('battery-container');
+        if (!container) return;
+        
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 1.5, 9); 
+        camera.lookAt(0, 0, 0);
 
+        renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('battery-canvas'), alpha: true, antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
 
+        batteryGroup = new THREE.Group();
+        
+        const ROWS = 2;
+        const COLS = 8;
+        const cellWidth = 1.5; 
+        const cellHeight = 1.9;
+        const cellDepth = 0.5;
+        const gap = 0.05;
 
-  <!-- 
-    - #BACK TO TOP
-  -->
+        const geometryWidth = cellDepth;
+        const geometryDepth = cellWidth;
 
-  <a href="#top" class="back-top-btn" aria-label="go to top" data-go-top-btn>
-    <ion-icon name="chevron-up" aria-hidden="true"></ion-icon>
-  </a>
+        const cellMaterial = new THREE.MeshStandardMaterial({ color: 0x4a5568, metalness: 0.6, roughness: 0.4 });
+        const posTerminalMaterial = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.9, roughness: 0.2 });
+        const negTerminalMaterial = new THREE.MeshStandardMaterial({ color: 0x3b82f6, metalness: 0.9, roughness: 0.2 });
+        const busbarMaterial = new THREE.MeshStandardMaterial({ color: 0x9ca3af, metalness: 0.8, roughness: 0.3 });
+        
+        const cellGeo = new THREE.BoxGeometry(geometryWidth, cellHeight, geometryDepth); 
+        const terminalGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.1, 12);
+        
+        const totalWidth = COLS * (geometryWidth + gap) - gap;
+        const totalDepth = ROWS * (geometryDepth + gap) - gap;
+        
+        const terminals = [];
 
+        for (let row = 0; row < ROWS; row++) {
+            for (let col = 0; col < COLS; col++) {
+                const cell = new THREE.Mesh(cellGeo, cellMaterial);
+                const x = (col * (geometryWidth + gap)) - totalWidth / 2 + geometryWidth / 2;
+                const z = (row * (geometryDepth + gap)) - totalDepth / 2 + geometryDepth / 2;
+                cell.position.set(x, cellHeight / 2, z);
+                batteryGroup.add(cell);
 
+                const terminalY = cellHeight + 0.05;
+                
+                const posTerminal = new THREE.Mesh(terminalGeo, posTerminalMaterial);
+                posTerminal.position.set(x, terminalY, z - geometryDepth / 4);
+                
+                const negTerminal = new THREE.Mesh(terminalGeo, negTerminalMaterial);
+                negTerminal.position.set(x, terminalY, z + geometryDepth / 4);
+                
+                batteryGroup.add(posTerminal, negTerminal);
+                terminals.push({pos: posTerminal, neg: negTerminal, row: row, col: col});
+            }
+        }
 
+        function createBusbar(p1, p2) {
+            if (!p1 || !p2) return null;
+            const midpoint = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+            const length = p1.distanceTo(p2);
+            const busbarGeo = new THREE.BoxGeometry(0.2, 0.05, length + 0.1);
+            const busbar = new THREE.Mesh(busbarGeo, busbarMaterial);
+            busbar.position.copy(midpoint);
+            busbar.lookAt(p2);
+            return busbar;
+        }
+        
+        const getTerminal = (row, col) => terminals.find(t => t.row === row && t.col === col);
+        
+        for (let col = 0; col < COLS - 1; col++) {
+            const cell1 = getTerminal(0, col);
+            const cell2 = getTerminal(0, col + 1);
+            if (cell1 && cell2) {
+                batteryGroup.add(createBusbar(cell1.neg.position, cell2.pos.position));
+            }
+        }
+        
+        const endOfRow0_cell = getTerminal(0, COLS - 1);
+        const startOfRow1_cell = getTerminal(1, COLS - 1);
+        if (endOfRow0_cell && startOfRow1_cell) {
+             batteryGroup.add(createBusbar(endOfRow0_cell.neg.position, startOfRow1_cell.pos.position));
+        }
+        
+        for (let col = COLS - 1; col > 0; col--) {
+            const cell1 = getTerminal(1, col);
+            const cell2 = getTerminal(1, col - 1);
+            if (cell1 && cell2) {
+                batteryGroup.add(createBusbar(cell1.neg.position, cell2.pos.position));
+            }
+        }
 
+        // --- ADD TRANSPARENT ENCLOSURE AND BMS BOX ---
+        const padding = 0.1;
+        const enclosureWidth = totalWidth + padding * 2;
+        const enclosureHeight = cellHeight + 0.2; // Extra height for terminals
+        const enclosureDepth = totalDepth + padding * 2;
 
-  <!-- 
-    - custom js link
-  -->
-  <script src="./assets/js/script.js"></script>
+        const enclosureGeo = new THREE.BoxGeometry(enclosureWidth, enclosureHeight, enclosureDepth);
+        const enclosureMaterial = new THREE.MeshStandardMaterial({
+            color: 0xaaaaaa,
+            transparent: true,
+            opacity: 0.2,
+            roughness: 0.1
+        });
+        const enclosure = new THREE.Mesh(enclosureGeo, enclosureMaterial);
+        enclosure.position.set(0, cellHeight / 2 + 0.1, 0);
+        batteryGroup.add(enclosure);
 
-  <!-- 
-    - ionicon link
-  -->
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+        // Add BMS box on the side
+        const bmsBoxWidth = 0.6;
+        const bmsBoxGeo = new THREE.BoxGeometry(bmsBoxWidth, enclosureHeight * 0.9, enclosureDepth * 0.95);
+        const bmsBoxMaterial = new THREE.MeshStandardMaterial({ color: 0x2d3748, metalness: 0.7, roughness: 0.3 });
+        const bmsBox = new THREE.Mesh(bmsBoxGeo, bmsBoxMaterial);
+        bmsBox.position.set(-(enclosureWidth / 2) - (bmsBoxWidth / 2) - 0.1, cellHeight / 2 + 0.1, 0);
+        batteryGroup.add(bmsBox);
+        
+        scene.add(batteryGroup);
+        batteryGroup.rotation.x = 0.15;
+        batteryGroup.rotation.y = -0.3;
 
+        animate();
+        window.addEventListener('resize', onWindowResize, false);
+        
+        let previousMousePosition = { x: 0, y: 0 };
+        const onPointerDown = (e) => { 
+            isDragging = true; 
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        };
+        const onPointerUp = () => { isDragging = false; };
+        const onPointerMove = (e) => {
+            if (!isDragging) return;
+            const deltaMove = { x: e.clientX - previousMousePosition.x, y: e.clientY - previousMousePosition.y };
+            batteryGroup.rotation.y += deltaMove.x * 0.01;
+            batteryGroup.rotation.x += deltaMove.y * 0.01;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        };
+
+        container.addEventListener('pointerdown', onPointerDown);
+        document.addEventListener('pointerup', onPointerUp);
+        document.addEventListener('pointermove', onPointerMove);
+    }
+
+    function onWindowResize() {
+        const container = document.getElementById('battery-container');
+        if (!container || !renderer) return;
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        if (batteryGroup && !isDragging) { 
+             batteryGroup.rotation.y += 0.003;
+        }
+        if (renderer) renderer.render(scene, camera);
+    }
+    
+    init3DModel();
+
+    // --- Robust API Fetch with Exponential Backoff ---
+    async function fetchWithBackoff(apiUrl, payload, maxRetries = 5) {
+        let delay = 1000;
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (response.ok) {
+                    return await response.json();
+                } else if (response.status === 429 || response.status >= 500) {
+                    console.warn(`API call failed with status ${response.status}. Retrying in ${delay}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                } else {
+                    return await response.json();
+                }
+            } catch (error) {
+                 console.warn(`Fetch error: ${error.message}. Retrying in ${delay}ms...`);
+                 await new Promise(resolve => setTimeout(resolve, delay));
+                 delay *= 2;
+            }
+        }
+        throw new Error(`Failed to fetch from API after ${maxRetries} retries.`);
+    }
+
+    // --- Improved Markdown Parser ---
+    function parseMarkdown(text) {
+        return text
+            .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mb-2">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mb-3">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-extrabold mb-4">$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/^\s*[-*] (.*)/gm, '<li>$1</li>')
+            .replace(/^\s*\d+\. (.*)/gm, '<li>$1</li>')
+            .replace(/<\/li>\s*<li>/g, '</li><li>') // Consolidate list items
+            .replace(/(<ul>\s*)?<li>/g, (match, p1) => p1 ? match : '<ul><li>') // Wrap with <ul>
+            .replace(/<\/li>\s*(?!<li>)/g, '</li></ul>') // Close <ul>
+            .replace(/\n/g, '<br>');
+    }
+    
+    // --- Reusable Battery Loader ---
+    const createBatteryLoader = (text) => {
+        return `
+            <div class="flex items-center justify-center h-full">
+                <div class="battery-loader">
+                    <div class="battery-outline">
+                        <div class="battery-charge">
+                            <div class="battery-bar"></div>
+                            <div class="battery-bar"></div>
+                            <div class="battery-bar"></div>
+                            <div class="battery-bar"></div>
+                        </div>
+                    </div>
+                    <p class="ml-3 text-sm text-gray-500 dark:text-gray-400">${text}</p>
+                </div>
+            </div>
+        `;
+    };
+
+    // --- AI Chatbot ---
+    const chatbotToggle = document.getElementById('chatbot-toggle');
+    const chatbotWindow = document.getElementById('chatbot-window');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    
+    chatbotToggle.addEventListener('click', () => { chatbotWindow.classList.toggle('hidden-chat'); });
+    
+    const addMessage = (text, sender) => {
+        const messageContainer = document.createElement('div');
+        messageContainer.className = `flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+        const messageBubble = document.createElement('div');
+        messageBubble.className = `p-3 rounded-lg max-w-xs text-sm ${sender === 'user' ? 'bg-brand-green text-white' : 'bg-gray-200 dark:bg-gray-700'}`;
+        messageBubble.innerHTML = text;
+        messageContainer.appendChild(messageBubble);
+        chatMessages.appendChild(messageContainer);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    const handleChat = async () => {
+        const userMessage = chatInput.value.trim();
+        if (!userMessage) return;
+        addMessage(userMessage, 'user');
+        chatInput.value = '';
+        addMessage(createBatteryLoader('Thinking...'), 'bot');
+        const apiKey = ""; 
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const systemPrompt = `You are a friendly and knowledgeable AI assistant for BattVolt, a company specializing in advanced lithium-ion battery packs for EVs and home storage. Your CEO is Ashish. Provide concise, helpful answers. Use markdown for formatting like lists or bold text.`;
+        const payload = { contents: [{ parts: [{ text: userMessage }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+
+        try {
+            const result = await fetchWithBackoff(apiUrl, payload);
+            chatMessages.removeChild(chatMessages.lastChild); 
+            if (result && result.candidates && result.candidates[0].content.parts[0].text) {
+                const botResponse = parseMarkdown(result.candidates[0].content.parts[0].text);
+                addMessage(botResponse, 'bot');
+            } else { addMessage("I'm sorry, I couldn't process that. Please try again.", 'bot'); }
+        } catch (error) {
+            chatMessages.removeChild(chatMessages.lastChild);
+            addMessage("There was an error connecting to our AI service. Please check your connection and try again.", 'bot');
+            console.error("Gemini API Error:", error);
+        }
+    };
+    
+    chatSend.addEventListener('click', handleChat);
+    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { handleChat(); } });
+
+    // --- Solution Consultant ---
+    const solutionInput = document.getElementById('solution-input');
+    const solutionOutput = document.getElementById('solution-output');
+    const askSolutionBtn = document.getElementById('ask-gemini-solution');
+
+    const handleSolutionRequest = async () => {
+        const requirements = solutionInput.value.trim();
+        if (!requirements) {
+            solutionOutput.innerHTML = "Please describe your requirements first.";
+            return;
+        }
+        solutionOutput.innerHTML = createBatteryLoader('Analyzing your needs...');
+        
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+        const systemPrompt = `You are an expert BattVolt Solution Consultant. Your goal is to analyze user requirements and recommend a specific BattVolt battery product (Two-Wheeler Series, Three-Wheeler Series, Home Storage, or a Custom Solution). Be specific and justify your recommendation based on the user's needs. Use markdown for formatting (e.g., headers, bold text, lists).`;
+        const userPrompt = `Based on the following requirements, please recommend the best BattVolt battery solution: "${requirements}"`;
+        const payload = { contents: [{ parts: [{ text: userPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+
+        try {
+            const result = await fetchWithBackoff(apiUrl, payload);
+            if (result && result.candidates && result.candidates[0].content.parts[0].text) {
+                const botResponse = parseMarkdown(result.candidates[0].content.parts[0].text);
+                solutionOutput.innerHTML = botResponse;
+            } else {
+                solutionOutput.innerHTML = "I'm sorry, I couldn't generate a recommendation. Please try rephrasing your request.";
+            }
+        } catch (error) {
+            solutionOutput.innerHTML = "There was an error connecting to the AI service. Please check your internet connection and try again.";
+            console.error("Solution Consultant API Error:", error);
+        }
+    };
+
+    askSolutionBtn.addEventListener('click', handleSolutionRequest);
+    
+    // --- Gemini Explanation Modal ---
+    const explanationModal = document.getElementById('explanation-modal');
+    const explanationModalContent = document.getElementById('explanation-modal-content');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+
+    const openModal = () => {
+        explanationModal.classList.remove('hidden');
+        setTimeout(() => {
+            explanationModal.classList.remove('opacity-0');
+            explanationModalContent.classList.remove('opacity-0', 'scale-95');
+        }, 10);
+    };
+
+    const closeModal = () => {
+        explanationModalContent.classList.add('opacity-0', 'scale-95');
+        explanationModal.classList.add('opacity-0');
+        setTimeout(() => {
+            explanationModal.classList.add('hidden');
+        }, 300);
+    };
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    explanationModal.addEventListener('click', (e) => {
+        if (e.target === explanationModal) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.explain-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const card = e.target.closest('.group');
+            const title = card.querySelector('.tech-title').textContent;
+            const description = card.querySelector('.tech-description').textContent;
+            
+            modalTitle.textContent = title;
+            modalBody.innerHTML = createBatteryLoader('Generating simple explanation...');
+            openModal();
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const systemPrompt = `You are a helpful science communicator who specializes in battery technology. Explain complex topics in a very simple, concise, and friendly way, suitable for a complete beginner or a 10-year-old. Use analogies where possible. Do not use markdown.`;
+            const userPrompt = `Explain this concept simply: "${title} - ${description}"`;
+            const payload = { contents: [{ parts: [{ text: userPrompt }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+
+            try {
+                const result = await fetchWithBackoff(apiUrl, payload);
+                if (result && result.candidates && result.candidates[0].content.parts[0].text) {
+                    modalBody.innerHTML = result.candidates[0].content.parts[0].text;
+                } else {
+                    modalBody.textContent = "Sorry, I couldn't generate an explanation at this time. Please try again later.";
+                }
+            } catch (error) {
+                modalBody.textContent = "There was an error reaching the AI service. Please check your connection.";
+                console.error("Explanation API Error:", error);
+            }
+        });
+    });
+
+    // --- Improved Form Handling ---
+    const handleFormSubmit = (formId, containerId, message) => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const container = document.getElementById(containerId);
+                container.innerHTML = `<div class="text-center p-8"><h3 class="text-2xl font-bold mb-4 text-brand-green">Thank You!</h3><p>${message}</p></div>`;
+            });
+        }
+    };
+    handleFormSubmit('career-form', 'career-form-container', "Your application has been received. We'll be in touch if you're a good fit.");
+    handleFormSubmit('contact-form', 'contact-form-container', "Your message has been sent. We'll get back to you shortly.");
+
+    // --- Active Nav Link on Scroll ---
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('#main-nav a.nav-link');
+    const observerOptions = { rootMargin: '-50% 0px -50% 0px', threshold: 0 };
+
+    const navObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, observerOptions);
+    sections.forEach(section => navObserver.observe(section));
+    
+    // --- Scroll-to-Top Button ---
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            scrollToTopBtn.classList.remove('opacity-0', 'translate-y-4');
+        } else {
+            scrollToTopBtn.classList.add('opacity-0', 'translate-y-4');
+        }
+    });
+    scrollToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    // --- Reveal Elements on Scroll ---
+    const revealElements = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    // --- View Specs Button Logic ---
+    document.querySelectorAll('.view-specs-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const cardBody = e.target.closest('.p-6');
+            const specsContainer = cardBody.querySelector('.specs-container');
+            specsContainer.classList.toggle('specs-visible');
+
+            if (specsContainer.classList.contains('specs-visible')) {
+                e.target.textContent = 'Hide Specs';
+            } else {
+                e.target.textContent = 'View Specs';
+            }
+        });
+    });
+});
+</script>
 </body>
-
 </html>
+
+
+

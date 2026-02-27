@@ -1,0 +1,734 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Crown, ShoppingBag, Menu, X, ChevronRight, ChevronLeft,
+  Star, Plus, Minus, Trash2, ArrowLeft,
+  Truck, ShieldCheck, Zap, Heart, User, Search, MapPin, Mail, Phone,
+  Sparkles, Gift, Flame, Briefcase, PartyPopper, PackageOpen, Send,
+  Wand2, Box, Package, CheckCircle, Clock, Navigation, Trophy, Ticket, Unlock, Gamepad2
+} from 'lucide-react';
+
+// --- ENHANCED DATA WITH DYNAMIC HERO TEXT ---
+const CATEGORIES = ['All', 'Combo Offers 🎁', 'Gift Hampers 🎀', 'Chips 🍟', 'Namkeen 🥣', 'Sweets 🍬', 'Dry Fruits 🥜'];
+
+const HERO_CATEGORIES = [
+  { 
+    name: 'CHIPS 🍟', 
+    image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=800&q=80', 
+    color1: 'bg-yellow-400', 
+    color2: 'bg-orange-500',
+    badge: '🔥 BEST SNACKS IN TOWN', 
+    title1: 'Snack Like', 
+    title2: 'A King.', 
+    desc: 'Your favorite traditional flavors, upgraded with bold spices and aesthetic vibes. ✨'
+  },
+  { 
+    name: 'SWEETS 🍬', 
+    image: 'https://images.unsplash.com/photo-1599598425947-330026291a11?auto=format&fit=crop&w=800&q=80', 
+    color1: 'bg-pink-400', 
+    color2: 'bg-purple-500',
+    badge: '🍬 SUGAR RUSH', 
+    title1: 'Satisfy Your', 
+    title2: 'Cravings.', 
+    desc: 'Melt-in-your-mouth premium Indian sweets, crafted with pure ghee and love. 💛'
+  },
+  { 
+    name: 'NAMKEEN 🥣', 
+    image: 'https://images.unsplash.com/photo-1604014237800-1c9102c219ed?auto=format&fit=crop&w=800&q=80', 
+    color1: 'bg-teal-400', 
+    color2: 'bg-blue-500',
+    badge: '🌶️ SPICE IT UP', 
+    title1: 'The Perfect', 
+    title2: 'Crunch.', 
+    desc: 'Authentic, fiery, and savory mixtures that make every tea-time special. ☕'
+  },
+  { 
+    name: 'DRY FRUITS 🥜', 
+    image: 'https://images.unsplash.com/photo-1599508704512-2f19efd1e35f?auto=format&fit=crop&w=800&q=80', 
+    color1: 'bg-amber-400', 
+    color2: 'bg-red-500',
+    badge: '💪 HEALTHY BITES', 
+    title1: 'Premium &', 
+    title2: 'Roasted.', 
+    desc: 'Handpicked premium nuts tossed in zesty, secret seasoning blends. 🌿'
+  },
+  { 
+    name: 'COMBOS 🎁', 
+    image: 'https://images.unsplash.com/photo-1606850080356-31f471e9fa49?auto=format&fit=crop&w=800&q=80', 
+    color1: 'bg-red-400', 
+    color2: 'bg-yellow-400',
+    badge: '💸 MEGA SAVINGS', 
+    title1: 'Bigger Is', 
+    title2: 'Better.', 
+    desc: 'Curated snack bundles to keep your pantry stocked and your wallet happy. 💯'
+  },
+  { 
+    name: 'HAMPERS 🎀', 
+    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80', 
+    color1: 'bg-purple-400', 
+    color2: 'bg-pink-500',
+    badge: '🎁 GIFTING MAGIC', 
+    title1: 'Unbox Pure', 
+    title2: 'Joy.', 
+    desc: 'Aesthetic luxury hampers perfect for festivals, weddings, and corporate gifting. 🎉'
+  }
+];
+
+const PRODUCTS = [
+  { id: 201, name: 'The Royal Wedding Box', category: 'Gift Hampers 🎀', price: 1499, rating: 5.0, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80', badge: 'Bestseller 💍', isHamper: true, description: 'The perfect return gift for your big fat Indian wedding. Includes premium dry fruits and sweets.' },
+  { id: 202, name: 'The CEO Diwali Stash', category: 'Gift Hampers 🎀', price: 2499, originalPrice: 2999, rating: 4.9, image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=600&q=80', badge: 'Corporate 🏢', isOffer: true, isHamper: true, description: 'A massive aesthetic box packed with our top trending snacks and premium chocolates.' },
+  { id: 101, name: 'The Ultimate Party Box', category: 'Combo Offers 🎁', price: 699, originalPrice: 999, rating: 5.0, image: 'https://images.unsplash.com/photo-1576402187878-974f70c890a5?auto=format&fit=crop&w=600&q=80', badge: 'SAVE 30%', isOffer: true, description: 'Includes 2x Masala Crunch, 1x Ratlami Sev, 1x Kaju Katli box, and Peri Peri Cashews.' },
+  { id: 1, name: 'Spicy Masala Crunch', category: 'Chips 🍟', price: 45, rating: 4.8, image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=600&q=80', badge: 'Spicy 🌶️', description: 'The ultimate spicy potato chips with a secret blend of spices.' },
+  { id: 2, name: 'Minty Magic Wafers', category: 'Chips 🍟', price: 40, rating: 4.5, image: 'https://images.unsplash.com/photo-1613919113640-25732ec5e61f?auto=format&fit=crop&w=600&q=80', badge: 'New ✨', description: 'Cool mint meets crunchy potato. A refreshing twist.' },
+  { id: 3, name: 'Royal Ratlami Sev', category: 'Namkeen 🥣', price: 85, rating: 4.9, image: 'https://images.unsplash.com/photo-1604014237800-1c9102c219ed?auto=format&fit=crop&w=600&q=80', badge: 'Crunchy 🔥', description: 'Authentic Ratlami Sev made with premium gram flour.' },
+  { id: 4, name: 'Khatta Meetha Mix', category: 'Namkeen 🥣', price: 75, rating: 4.7, image: 'https://images.unsplash.com/photo-1596649299486-4cdea56fd59d?auto=format&fit=crop&w=600&q=80', description: 'A beautiful balance of sweet, sour, and salty mix.' },
+  { id: 5, name: 'Kesar Kaju Katli', category: 'Sweets 🍬', price: 450, rating: 5.0, image: 'https://images.unsplash.com/photo-1599598425947-330026291a11?auto=format&fit=crop&w=600&q=80', badge: 'Premium ⚜️', description: 'Melt-in-your-mouth cashew fudge infused with pure saffron.' },
+  { id: 7, name: 'Peri Peri Cashews', category: 'Dry Fruits 🥜', price: 299, rating: 4.8, image: 'https://images.unsplash.com/photo-1599508704512-2f19efd1e35f?auto=format&fit=crop&w=600&q=80', badge: 'Trending 📈', description: 'Premium roasted cashews tossed in a zesty, fiery Peri Peri seasoning.' },
+];
+
+export default function App() {
+  const [currentPage, setCurrentPage] = useState('home'); 
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [wishlist, setWishlist] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Custom Hamper & Tracking State
+  const [latestOrderId, setLatestOrderId] = useState(null);
+  
+  // Global Points State (Starts at 450 for demo)
+  const [crownPoints, setCrownPoints] = useState(450);
+
+  // --- ACTIONS ---
+  const addToCart = (product, quantity = 1) => {
+    setCart(prev => {
+      const existing = prev.find(item => item.id === product.id && !item.isCustomHamper);
+      if (existing && !product.isCustomHamper) {
+        return prev.map(item => item.id === product.id ? { ...item, qty: item.qty + quantity } : item);
+      }
+      return [...prev, { ...product, qty: quantity }];
+    });
+    const btn = document.getElementById(`add-btn-${product.id}`);
+    if(btn) {
+      btn.classList.add('animate-ping-once');
+      setTimeout(() => btn.classList.remove('animate-ping-once'), 300);
+    }
+  };
+
+  const updateQty = (id, delta) => setCart(prev => prev.map(item => item.id === id ? { ...item, qty: Math.max(1, item.qty + delta) } : item));
+  const removeFromCart = (id) => setCart(prev => prev.filter(item => item.id !== id));
+  const toggleWishlist = (id, e) => { if(e) e.stopPropagation(); setWishlist(prev => prev.includes(id) ? prev.filter(wId => wId !== id) : [...prev, id]); };
+  const viewProduct = (product) => { setSelectedProduct(product); navigate('product'); };
+
+  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  const cartItemCount = cart.reduce((sum, item) => sum + item.qty, 0);
+
+  const navigate = (page) => {
+    setCurrentPage(page);
+    setIsMobileMenuOpen(false);
+    window.scrollTo(0, 0);
+  };
+
+  // --- COMPONENTS ---
+  const Header = () => (
+    <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b-4 border-slate-900 shadow-sm">
+      <div className="bg-orange-500 text-white font-black py-2 overflow-hidden border-b-2 border-slate-900 relative">
+        <div className="whitespace-nowrap animate-marquee flex items-center gap-8 text-sm tracking-widest uppercase">
+          <span>👑 JOIN THE CROWN CLUB - EARN POINTS ON EVERY ORDER!</span>
+          <span>⚡ UNLOCK SECRET DISCOUNTS</span>
+          <span>🚚 TRACK YOUR ORDERS LIVE IN 3D</span>
+          <span>✨ FREE DELIVERY OVER ₹500</span>
+        </div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-20 gap-4">
+          <button onClick={() => navigate('home')} className="flex-shrink-0 flex items-center group relative">
+            <div className="text-3xl font-black tracking-tighter text-slate-900 flex items-center drop-shadow-[2px_2px_0_#f97316] relative z-10">
+              M<span className="relative inline-block mx-[2px] text-orange-500">O<Crown className="absolute -top-5 left-1/2 -translate-x-1/2 w-7 h-7 text-red-500 drop-shadow-[1px_1px_0_#000] group-hover:-translate-y-2 group-hover:rotate-12 transition-transform duration-300" strokeWidth={2.5} /></span>MRAJ
+            </div>
+          </button>
+
+          <div className="hidden lg:flex space-x-2 xl:space-x-3 items-center">
+            <button onClick={() => navigate('shop')} className={`font-black uppercase tracking-wider text-sm px-3 py-2 rounded-lg transition-all ${currentPage === 'shop' ? 'bg-orange-500 text-white shadow-[2px_2px_0_#000]' : 'text-slate-700 hover:text-orange-600 hover:-translate-y-1'}`}>Shop</button>
+            <button onClick={() => navigate('gifting')} className={`font-black uppercase tracking-wider text-sm px-3 py-2 rounded-lg transition-all flex items-center gap-1 ${currentPage === 'gifting' ? 'bg-pink-400 text-slate-900 shadow-[3px_3px_0_#000]' : 'bg-pink-100 text-pink-700 border-2 border-slate-900 shadow-[2px_2px_0_#000] hover:-translate-y-1 hover:shadow-[4px_4px_0_#000]'}`}><PartyPopper className="w-4 h-4"/> Gifting</button>
+            <button onClick={() => navigate('custom-hamper')} className={`font-black uppercase tracking-wider text-sm px-3 py-2 rounded-lg transition-all flex items-center gap-1 ${currentPage === 'custom-hamper' ? 'bg-purple-500 text-white shadow-[3px_3px_0_#000]' : 'bg-purple-100 text-purple-700 border-2 border-slate-900 shadow-[2px_2px_0_#000] hover:-translate-y-1 hover:shadow-[4px_4px_0_#000]'}`}><Wand2 className="w-4 h-4"/> Build Hamper</button>
+            {/* NEW REWARDS TAB */}
+            <button onClick={() => navigate('rewards')} className={`font-black uppercase tracking-wider text-sm px-3 py-2 rounded-lg transition-all flex items-center gap-1 ${currentPage === 'rewards' ? 'bg-yellow-400 text-slate-900 shadow-[3px_3px_0_#000]' : 'bg-yellow-100 text-yellow-800 border-2 border-slate-900 shadow-[2px_2px_0_#000] hover:-translate-y-1 hover:shadow-[4px_4px_0_#000]'}`}><Trophy className="w-4 h-4"/> Crown Club</button>
+            <button onClick={() => navigate('tracking')} className={`font-black uppercase tracking-wider text-sm px-3 py-2 rounded-lg transition-all flex items-center gap-1 ${currentPage === 'tracking' ? 'bg-teal-400 text-slate-900 shadow-[3px_3px_0_#000]' : 'bg-teal-100 text-teal-800 border-2 border-slate-900 shadow-[2px_2px_0_#000] hover:-translate-y-1 hover:shadow-[4px_4px_0_#000]'}`}><Truck className="w-4 h-4"/> Track</button>
+          </div>
+
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <button onClick={() => navigate('wishlist')} className="p-2 text-slate-900 border-2 border-transparent hover:border-slate-900 rounded-xl hover:shadow-[3px_3px_0_#000] hover:-translate-y-1 transition-all relative hidden sm:block bg-white"><Heart className="w-5 h-5" />{wishlist.length > 0 && <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white font-black text-xs flex items-center justify-center rounded-full border-2 border-slate-900">{wishlist.length}</span>}</button>
+            <button onClick={() => navigate('cart')} className="relative p-2 bg-orange-500 text-white rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_#000] active:translate-y-1 active:shadow-[0px_0px_0_#000] transition-all flex items-center gap-2"><ShoppingBag className="w-5 h-5" /><span className="font-black text-sm pr-1">{cartItemCount}</span></button>
+            <button className="lg:hidden p-2 text-slate-900 bg-yellow-300 rounded-xl border-2 border-slate-900 shadow-[3px_3px_0_#000]" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>{isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}</button>
+          </div>
+        </div>
+      </div>
+
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-white border-y-4 border-slate-900 absolute w-full left-0 z-50">
+          <div className="p-6 flex flex-col gap-4 pattern-bg">
+            <button onClick={() => navigate('shop')} className="w-full bg-white border-2 border-slate-900 font-black text-xl py-3 rounded-xl shadow-[4px_4px_0_#000]">Shop All</button>
+            <button onClick={() => navigate('rewards')} className="w-full bg-yellow-300 text-slate-900 border-2 border-slate-900 font-black text-xl py-3 rounded-xl shadow-[4px_4px_0_#000] flex justify-center items-center gap-2"><Trophy/> Crown Club Rewards</button>
+            <button onClick={() => navigate('gifting')} className="w-full bg-pink-300 text-slate-900 border-2 border-slate-900 font-black text-xl py-3 rounded-xl shadow-[4px_4px_0_#000] flex justify-center items-center gap-2"><PartyPopper/> Gifting</button>
+            <button onClick={() => navigate('custom-hamper')} className="w-full bg-purple-300 text-slate-900 border-2 border-slate-900 font-black text-xl py-3 rounded-xl shadow-[4px_4px_0_#000] flex justify-center items-center gap-2"><Wand2/> Build Hamper</button>
+            <button onClick={() => navigate('tracking')} className="w-full bg-teal-300 text-slate-900 border-2 border-slate-900 font-black text-xl py-3 rounded-xl shadow-[4px_4px_0_#000] flex justify-center items-center gap-2"><Truck/> Track Order</button>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+
+  const ProductCard = ({ product }) => (
+    <div onClick={() => viewProduct(product)} className={`bg-white rounded-3xl overflow-hidden border-4 border-slate-900 flex flex-col h-full relative cursor-pointer transform transition-transform duration-300 hover:-translate-y-2 hover:shadow-[8px_8px_0_#f97316] ${product.isHamper ? 'shadow-[8px_8px_0_#ec4899]' : product.isOffer ? 'shadow-[8px_8px_0_#eab308]' : 'shadow-[8px_8px_0_#1e293b]'}`}>
+      <div className="absolute top-4 left-4 right-4 flex justify-between z-10 pointer-events-none">
+        {product.badge ? (
+          <span className={`text-sm font-black px-3 py-1.5 rounded-xl border-2 border-slate-900 shadow-[3px_3px_0_#000] ${product.isHamper ? 'bg-pink-300 text-slate-900' : product.isOffer ? 'bg-yellow-300 text-slate-900 animate-pulse-slow' : 'bg-white text-slate-900'}`}>{product.badge}</span>
+        ) : <span />}
+        <button onClick={(e) => toggleWishlist(product.id, e)} className="pointer-events-auto w-10 h-10 rounded-full bg-white border-2 border-slate-900 flex items-center justify-center shadow-[3px_3px_0_#000] hover:-translate-y-1 hover:shadow-[4px_4px_0_#000] active:translate-y-0 active:shadow-none transition-all"><Heart className={`w-5 h-5 ${wishlist.includes(product.id) ? 'fill-red-500 text-red-500' : 'text-slate-900'}`} /></button>
+      </div>
+      <div className={`h-56 w-full overflow-hidden relative ${product.isHamper ? 'bg-gradient-to-br from-pink-200 to-purple-200' : product.isOffer ? 'bg-gradient-to-br from-yellow-200 to-orange-200' : 'bg-slate-100'}`}>
+        <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 mix-blend-multiply" />
+      </div>
+      <div className="p-5 flex flex-col flex-grow bg-white relative z-10 border-t-4 border-slate-900">
+        <h3 className="text-xl font-black text-slate-900 mb-2 leading-tight uppercase line-clamp-2">{product.name}</h3>
+        <p className="text-sm text-slate-600 font-bold mb-4 bg-slate-100 inline-block px-2 py-1 rounded border border-slate-300 self-start">{product.category}</p>
+        <div className="mt-auto flex items-center justify-between">
+          <div className="flex flex-col">
+            {product.originalPrice && <span className="text-sm text-slate-400 font-bold line-through decoration-red-500 decoration-2">₹{product.originalPrice}</span>}
+            <span className="text-3xl font-black text-orange-600 drop-shadow-[1px_1px_0_#000]">₹{product.price}</span>
+          </div>
+          <button id={`add-btn-${product.id}`} onClick={(e) => { e.stopPropagation(); addToCart(product); }} className={`w-12 h-12 rounded-2xl border-2 border-slate-900 flex items-center justify-center transition-all ${product.isHamper ? 'bg-pink-300 shadow-[4px_4px_0_#000] hover:bg-pink-400' : product.isOffer ? 'bg-yellow-300 shadow-[4px_4px_0_#000] hover:bg-yellow-400' : 'bg-slate-900 text-white shadow-[4px_4px_0_#f97316] hover:bg-slate-800 hover:-translate-y-1 hover:shadow-[6px_6px_0_#f97316]'} active:translate-y-1 active:shadow-none`}><Plus className={`w-6 h-6 font-black ${product.isOffer || product.isHamper ? 'text-slate-900' : 'text-white'}`} strokeWidth={3} /></button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // --- VIEWS ---
+  const HomeView = () => {
+    const [heroIdx, setHeroIdx] = useState(0);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
+
+    const nextHero = () => setHeroIdx((prev) => (prev + 1) % HERO_CATEGORIES.length);
+    const prevHero = () => setHeroIdx((prev) => (prev - 1 + HERO_CATEGORIES.length) % HERO_CATEGORIES.length);
+
+    const onTouchStart = (e) => { setTouchEnd(null); setTouchStart(e.targetTouches[0].clientX); };
+    const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+    const onTouchEndEvent = () => { if (!touchStart || !touchEnd) return; if (touchStart - touchEnd > 50) nextHero(); if (touchStart - touchEnd < -50) prevHero(); };
+
+    const currentCat = HERO_CATEGORIES[heroIdx];
+    const prevCat = HERO_CATEGORIES[(heroIdx + 1) % HERO_CATEGORIES.length];
+    const backCat = HERO_CATEGORIES[(heroIdx + 2) % HERO_CATEGORIES.length];
+
+    return (
+      <div className="animate-fade-in relative">
+        <section className="relative overflow-hidden bg-[#FF6B35] border-b-4 border-slate-900 pt-10 pb-16 transition-colors duration-1000" style={{backgroundColor: heroIdx % 2 === 0 ? '#FF6B35' : '#14B8A6'}}>
+          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`}}></div>
+          
+          <div className="max-w-7xl mx-auto px-6 py-12 md:py-24 relative z-10 flex flex-col md:flex-row items-center gap-16">
+            
+            {/* DYNAMIC TEXT SECTION */}
+            <div className="md:w-1/2 text-center md:text-left min-h-[300px] flex flex-col justify-center">
+              {/* Adding key={heroIdx} forces React to re-mount these elements, re-triggering the animate-fade-in animation */}
+              <div key={`badge-${heroIdx}`} className="inline-block py-2 px-4 rounded-xl border-4 border-slate-900 bg-yellow-300 text-slate-900 font-black tracking-wider uppercase text-sm mb-6 shadow-[4px_4px_0_#000] transform -rotate-2 animate-fade-in w-max mx-auto md:mx-0">
+                {currentCat.badge}
+              </div>
+              
+              <h1 key={`title-${heroIdx}`} className="text-6xl md:text-8xl font-black text-white leading-[1] mb-6 tracking-tighter drop-shadow-[6px_6px_0_#000] uppercase animate-fade-in">
+                {currentCat.title1} <br/>
+                <span className="text-yellow-300">{currentCat.title2}</span>
+              </h1>
+              
+              {/* Added the enhanced black outline border to the caption box as requested */}
+              <p key={`desc-${heroIdx}`} className="text-xl md:text-2xl text-white font-black mb-10 max-w-lg mx-auto md:mx-0 drop-shadow-[2px_2px_0_#000] bg-slate-900/40 p-5 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_#000] backdrop-blur-sm animate-fade-in">
+                {currentCat.desc}
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-6 justify-center md:justify-start">
+                <button onClick={() => navigate('shop')} className="bg-slate-900 text-white text-xl font-black px-10 py-5 rounded-2xl border-4 border-slate-900 shadow-[8px_8px_0_#fff] hover:-translate-y-2 hover:shadow-[12px_12px_0_#fff] transition-all flex items-center justify-center gap-3">
+                  Shop Now <ChevronRight className="w-6 h-6" strokeWidth={3} />
+                </button>
+              </div>
+            </div>
+
+            {/* DYNAMIC IMAGE CAROUSEL */}
+            <div className="md:w-1/2 w-full relative perspective-1000">
+               <div className="relative w-full max-w-lg mx-auto aspect-square transform-3d rotate-y-[-15deg] rotate-x-[10deg] hover:rotate-y-0 hover:rotate-x-0 transition-transform duration-700 ease-out">
+                  <div className={`absolute inset-0 rounded-[3rem] border-4 border-slate-900 translate-x-10 translate-y-10 transition-colors duration-500 shadow-2xl ${backCat.color2}`}></div>
+                  <div className={`absolute inset-0 rounded-[3rem] border-4 border-slate-900 translate-x-5 translate-y-5 transition-colors duration-500 shadow-xl ${prevCat.color1}`}></div>
+                  <div className="relative z-10 w-full h-full bg-slate-100 rounded-[3rem] border-4 border-slate-900 overflow-hidden shadow-2xl group cursor-grab active:cursor-grabbing" onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEndEvent}>
+                    <div className="absolute top-6 right-6 bg-slate-900 text-white font-black px-5 py-3 rounded-xl border-4 border-white shadow-[6px_6px_0_#000] z-30 animate-pulse-slow transform rotate-6 transition-all text-xl">{currentCat.name}</div>
+                    
+                    {/* SWIPE BUTTONS */}
+                    <button onClick={(e) => { e.stopPropagation(); prevHero(); }} className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-white/90 backdrop-blur-sm p-3 rounded-full border-4 border-slate-900 shadow-[4px_4px_0_#000] hover:bg-orange-500 hover:text-white transition-colors hover:-translate-y-1"><ChevronLeft className="w-8 h-8 font-black" strokeWidth={3} /></button>
+                    <button onClick={(e) => { e.stopPropagation(); nextHero(); }} className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-white/90 backdrop-blur-sm p-3 rounded-full border-4 border-slate-900 shadow-[4px_4px_0_#000] hover:bg-orange-500 hover:text-white transition-colors hover:-translate-y-1"><ChevronRight className="w-8 h-8 font-black" strokeWidth={3} /></button>
+                    
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 bg-white/90 text-slate-900 font-bold px-4 py-2 rounded-full border-4 border-slate-900 shadow-[4px_4px_0_#000] md:hidden">👈 Swipe 👉</div>
+                    <img key={`img-${heroIdx}`} src={currentCat.image} alt={currentCat.name} className="w-full h-full object-cover mix-blend-multiply scale-110 group-hover:scale-125 transition-all duration-700 animate-image-swipe" />
+                  </div>
+               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Loyalty Marketing Banner */}
+        <div className="bg-yellow-300 py-6 border-b-4 border-slate-900 overflow-hidden cursor-pointer hover:bg-yellow-400 transition-colors" onClick={() => navigate('rewards')}>
+          <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-8 md:gap-24 animate-pulse-slow">
+            <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_#000] transform -rotate-1"><Trophy className="text-orange-500 w-8 h-8 fill-current"/><span className="font-black text-xl uppercase tracking-wider">Join Crown Club</span></div>
+            <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_#000] transform rotate-1"><Ticket className="text-purple-500 w-8 h-8"/><span className="font-black text-xl uppercase tracking-wider">Earn Rewards</span></div>
+          </div>
+        </div>
+
+        <section className="py-24 px-6 max-w-7xl mx-auto pattern-bg relative">
+          <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter text-center mb-16 drop-shadow-[4px_4px_0_#f97316] uppercase">Explore Categories 🤤</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {CATEGORIES.slice(1).map((cat, i) => {
+              const themes = [{bg: 'bg-red-500'}, {bg: 'bg-pink-400'}, {bg: 'bg-orange-400'}, {bg: 'bg-teal-400'}, {bg: 'bg-yellow-300'}, {bg: 'bg-amber-500'}];
+              return (
+                <button key={cat} onClick={() => { setActiveCategory(cat); navigate('shop'); }} className={`${themes[i].bg} rounded-3xl p-4 text-center hover:-translate-y-3 transition-transform duration-300 flex flex-col items-center justify-center h-48 border-4 border-slate-900 shadow-[6px_6px_0_#000] group relative overflow-hidden`}>
+                  <span className="text-xl md:text-2xl font-black text-slate-900 drop-shadow-[2px_2px_0_#fff] relative z-10 leading-tight">{cat.split(' ')[0]} <br/> {cat.split(' ').slice(1).join(' ')}</span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      </div>
+    );
+  };
+
+  const ShopView = () => {
+    const filteredProducts = PRODUCTS.filter(p => (activeCategory === 'All' || p.category === activeCategory) && (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.category.toLowerCase().includes(searchQuery.toLowerCase())));
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in min-h-[70vh]">
+        <h1 className="text-6xl font-black text-slate-900 tracking-tighter mb-8 drop-shadow-[4px_4px_0_#f97316] uppercase text-center md:text-left">{activeCategory === 'Combo Offers 🎁' ? 'Super Savers 💸' : activeCategory === 'Gift Hampers 🎀' ? 'Gift Hampers 🎀' : 'All Snacks 🛒'}</h1>
+        <div className="flex flex-wrap gap-4 mb-12 justify-center md:justify-start">
+          {CATEGORIES.map(cat => (
+            <button key={cat} onClick={() => { setActiveCategory(cat); setSearchQuery(''); }} className={`px-6 py-3 rounded-2xl font-black uppercase tracking-wider transition-all border-4 border-slate-900 ${activeCategory === cat ? 'bg-slate-900 text-white shadow-[6px_6px_0_#f97316] -translate-y-1' : 'bg-white text-slate-900 shadow-[4px_4px_0_#000] hover:-translate-y-1 hover:shadow-[6px_6px_0_#000]'}`}>{cat}</button>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {filteredProducts.map(product => <ProductCard key={product.id} product={product} />)}
+        </div>
+      </div>
+    );
+  };
+
+  const ProductDetailView = () => {
+    if (!selectedProduct) return null;
+    const [qty, setQty] = useState(1);
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in">
+        <button onClick={() => navigate('shop')} className="flex items-center gap-2 text-slate-900 bg-white border-4 border-slate-900 px-4 py-2 rounded-xl font-black uppercase mb-8 shadow-[4px_4px_0_#000] hover:-translate-y-1 transition-all w-max"><ArrowLeft className="w-6 h-6" strokeWidth={3} /> Back</button>
+        <div className="bg-white border-4 border-slate-900 rounded-[3rem] shadow-[16px_16px_0_#f97316] overflow-hidden">
+          <div className="grid lg:grid-cols-2">
+            <div className={`p-8 md:p-12 relative flex items-center justify-center border-b-4 lg:border-b-0 lg:border-r-4 border-slate-900 ${selectedProduct.isHamper ? 'bg-gradient-to-br from-pink-300 to-purple-400' : selectedProduct.isOffer ? 'bg-gradient-to-br from-yellow-300 to-orange-400' : 'bg-slate-100'}`}>
+              <img src={selectedProduct.image} className="w-full max-w-md object-cover rounded-[2rem] border-4 border-slate-900 shadow-[12px_12px_0_#000] relative z-10 transform hover:scale-105 transition-transform duration-500" />
+            </div>
+            <div className="p-8 md:p-12 flex flex-col justify-center bg-white relative">
+              <span className={`inline-block border-2 font-black px-4 py-1 rounded-xl text-sm uppercase tracking-wider mb-4 w-max shadow-[3px_3px_0_#000] ${selectedProduct.isHamper ? 'bg-pink-100 text-pink-700 border-pink-700' : 'bg-orange-100 text-orange-700 border-orange-700'}`}>{selectedProduct.category}</span>
+              <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-[1.1] uppercase drop-shadow-[2px_2px_0_#cbd5e1]">{selectedProduct.name}</h1>
+              <div className="flex items-end gap-4 mb-8">
+                <p className="text-6xl font-black text-orange-600 drop-shadow-[3px_3px_0_#000]">₹{selectedProduct.price}</p>
+                {selectedProduct.originalPrice && <p className="text-3xl text-slate-400 font-black line-through decoration-red-500 decoration-4 mb-1">₹{selectedProduct.originalPrice}</p>}
+              </div>
+              <p className="text-xl text-slate-700 font-bold leading-relaxed mb-10 border-l-4 border-slate-900 pl-4">{selectedProduct.description}</p>
+              <div className="flex flex-col sm:flex-row gap-6 mb-10">
+                <div className="flex items-center justify-between bg-white border-4 border-slate-900 rounded-2xl p-2 sm:w-48 h-20 shadow-[6px_6px_0_#000]">
+                  <button onClick={() => setQty(Math.max(1, qty-1))} className="w-14 h-14 rounded-xl bg-slate-100 border-2 border-slate-900 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"><Minus className="w-6 h-6 font-black" /></button>
+                  <span className="font-black text-3xl w-12 text-center">{qty}</span>
+                  <button onClick={() => setQty(qty+1)} className="w-14 h-14 rounded-xl bg-slate-100 border-2 border-slate-900 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors"><Plus className="w-6 h-6 font-black" /></button>
+                </div>
+                <button onClick={() => { addToCart(selectedProduct, qty); navigate('cart'); }} className="flex-grow bg-slate-900 text-white font-black text-2xl uppercase rounded-2xl h-20 border-4 border-slate-900 shadow-[8px_8px_0_#f97316] hover:-translate-y-2 transition-all flex items-center justify-center gap-4">
+                  <ShoppingBag className="w-8 h-8" /> Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const CartView = () => (
+    <div className="max-w-7xl mx-auto px-6 py-12 animate-fade-in min-h-[70vh]">
+      <h1 className="text-6xl font-black text-slate-900 tracking-tighter mb-12 drop-shadow-[4px_4px_0_#f97316] uppercase">Your Cart 🛒</h1>
+      {cart.length === 0 ? (
+        <div className="text-center py-24 bg-white rounded-[3rem] border-4 border-slate-900 shadow-[12px_12px_0_#000]">
+          <span className="text-8xl block mb-6 animate-bounce">🥡</span>
+          <h2 className="text-4xl font-black text-slate-900 uppercase mb-4">It's empty in here!</h2>
+          <button onClick={() => navigate('shop')} className="mt-6 bg-orange-500 text-white font-black text-2xl px-10 py-5 rounded-2xl border-4 border-slate-900 shadow-[8px_8px_0_#000] hover:-translate-y-2 transition-transform">Fill It Up!</button>
+        </div>
+      ) : (
+        <div className="grid lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2 space-y-6">
+            {cart.map(item => (
+              <div key={item.id} className={`flex flex-col sm:flex-row items-center gap-6 p-6 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_#000] relative ${item.isCustomHamper ? 'bg-purple-100' : 'bg-white'}`}>
+                <button onClick={() => removeFromCart(item.id)} className="absolute top-4 right-4 sm:relative bg-red-500 text-white p-3 rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_#000] hover:-translate-y-1 transition-all sm:order-last ml-auto"><Trash2 className="w-6 h-6" /></button>
+                <img src={item.image} alt={item.name} className="w-32 h-32 object-cover rounded-2xl border-4 border-slate-900" />
+                <div className="flex-grow text-center sm:text-left w-full">
+                  <h3 className="text-2xl font-black text-slate-900 uppercase leading-tight mb-2">{item.name}</h3>
+                  {item.isCustomHamper && (
+                    <div className="mb-2 text-sm font-bold text-slate-700 bg-white p-2 rounded-lg border-2 border-slate-900 inline-block w-full">Contents: {item.items.map(i => i.name).join(', ')}</div>
+                  )}
+                  <div className="text-3xl text-orange-600 font-black drop-shadow-[1px_1px_0_#000]">₹{item.price}</div>
+                </div>
+                {!item.isCustomHamper && (
+                  <div className="flex items-center gap-4 bg-slate-100 rounded-2xl p-2 border-4 border-slate-900 shadow-[4px_4px_0_#000]">
+                    <button onClick={() => updateQty(item.id, -1)} className="w-10 h-10 rounded-xl bg-white border-2 border-slate-900 flex items-center justify-center font-black text-xl hover:bg-orange-500 active:scale-95"><Minus className="w-5 h-5"/></button>
+                    <span className="font-black text-2xl w-8 text-center">{item.qty}</span>
+                    <button onClick={() => updateQty(item.id, 1)} className="w-10 h-10 rounded-xl bg-white border-2 border-slate-900 flex items-center justify-center font-black text-xl hover:bg-orange-500 active:scale-95"><Plus className="w-5 h-5"/></button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="lg:col-span-1">
+            <div className="bg-white p-8 rounded-[2rem] border-4 border-slate-900 shadow-[12px_12px_0_#f97316] sticky top-32">
+              <h2 className="text-3xl font-black text-slate-900 mb-8 uppercase border-b-4 border-slate-900 pb-4">Checkout Bill</h2>
+              <div className="space-y-4 text-slate-700 font-bold text-lg mb-8">
+                <div className="flex justify-between"><span>Items Subtotal</span><span>₹{cartTotal}</span></div>
+                <div className="flex justify-between text-teal-600"><span>Delivery ⚡</span><span>FREE</span></div>
+                <div className="h-1 bg-slate-900 my-6"></div>
+                <div className="flex justify-between text-4xl font-black text-slate-900 uppercase"><span>Total</span><span className="text-orange-600 drop-shadow-[2px_2px_0_#000]">₹{cartTotal}</span></div>
+              </div>
+              <button onClick={() => navigate('checkout')} className="w-full bg-slate-900 text-white font-black text-2xl uppercase py-5 rounded-2xl border-4 border-slate-900 shadow-[8px_8px_0_#000] hover:-translate-y-2 transition-all flex justify-center items-center gap-2">Pay Securely <Zap className="w-6 h-6 fill-yellow-400 text-yellow-400" /></button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const CheckoutView = () => (
+    <div className="max-w-4xl mx-auto px-6 py-12 animate-fade-in min-h-[70vh]">
+      <h1 className="text-6xl font-black text-slate-900 tracking-tighter mb-12 drop-shadow-[4px_4px_0_#34d399] uppercase text-center">Final Step 🚀</h1>
+      <form onSubmit={(e) => { e.preventDefault(); const generatedId = 'MRJ' + Math.floor(100000 + Math.random() * 900000); setLatestOrderId(generatedId); setTimeout(() => { setCart([]); navigate('success'); }, 800); }} className="bg-white p-10 rounded-[3rem] border-4 border-slate-900 shadow-[16px_16px_0_#000]">
+        <h2 className="text-3xl font-black mb-8 flex items-center gap-3 uppercase"><MapPin className="text-orange-500 w-8 h-8"/> Where to send?</h2>
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="md:col-span-2"><input required type="text" placeholder="Full Name" className="w-full bg-slate-50 border-4 border-slate-900 rounded-2xl px-6 py-4 text-xl font-bold focus:outline-none focus:shadow-[8px_8px_0_#f97316]" /></div>
+          <div className="md:col-span-2"><textarea required placeholder="Complete Address" className="w-full bg-slate-50 border-4 border-slate-900 rounded-2xl px-6 py-4 text-xl font-bold focus:outline-none focus:shadow-[8px_8px_0_#f97316] h-32"></textarea></div>
+        </div>
+        <button type="submit" className="w-full bg-orange-500 text-white font-black text-3xl uppercase py-6 rounded-2xl border-4 border-slate-900 shadow-[12px_12px_0_#000] hover:-translate-y-2 transition-all">Confirm Order (₹{cartTotal})</button>
+      </form>
+    </div>
+  );
+
+  const SuccessView = () => {
+    const [boxOpened, setBoxOpened] = useState(false);
+    const [isShaking, setIsShaking] = useState(false);
+
+    const handleOpenBox = () => {
+      if(boxOpened) return;
+      setIsShaking(true);
+      setTimeout(() => { setIsShaking(false); setBoxOpened(true); }, 1000);
+    };
+
+    return (
+      <div className="max-w-4xl mx-auto px-6 py-20 text-center animate-fade-in min-h-[80vh] flex flex-col items-center justify-center relative pattern-bg">
+        <h1 className="text-6xl md:text-8xl font-black text-slate-900 mb-6 tracking-tighter uppercase drop-shadow-[4px_4px_0_#f97316]">Order Confirmed!</h1>
+        <div className="bg-white p-6 rounded-[2rem] border-4 border-slate-900 shadow-[8px_8px_0_#000] mb-12 w-full max-w-lg mx-auto">
+          <p className="text-2xl text-slate-700 font-bold mb-2">Your Order ID is:</p>
+          <p className="text-4xl font-black text-orange-600 bg-orange-50 py-2 rounded-xl border-4 border-slate-900 border-dashed">{latestOrderId}</p>
+        </div>
+        <div className="w-full max-w-3xl bg-purple-200 border-4 border-slate-900 rounded-[3rem] p-10 shadow-[16px_16px_0_#000] relative overflow-hidden transition-all duration-500">
+          {!boxOpened ? (
+            <div className="flex flex-col items-center">
+              <h2 className="text-4xl font-black text-slate-900 uppercase mb-4 animate-pulse">Wait! Don't leave yet...</h2>
+              <p className="text-xl font-bold text-slate-700 mb-8">You unlocked a secret Mystery Box with your order. Tap to open it!</p>
+              <button onClick={handleOpenBox} className={`text-8xl cursor-pointer hover:scale-110 transition-transform ${isShaking ? 'animate-shake' : 'animate-bounce'}`}>🎁</button>
+              <p className="mt-6 font-bold text-purple-600 uppercase tracking-widest text-sm">Tap the box</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center animate-pop">
+              <div className="text-8xl mb-6">🎉</div>
+              <h2 className="text-5xl font-black text-slate-900 uppercase mb-4 drop-shadow-[3px_3px_0_#fcd34d]">You Won 20% OFF!</h2>
+              <p className="text-2xl font-bold text-slate-700 mb-8 max-w-lg">Claim your reward on your next order. Only valid for the next 7 days!</p>
+              <div className="bg-yellow-300 text-slate-900 border-4 border-slate-900 border-dashed rounded-2xl px-10 py-6 mb-8 transform -rotate-2">
+                <span className="text-sm font-black uppercase tracking-widest block mb-2">Use Promo Code</span>
+                <span className="text-5xl font-black tracking-tighter select-all">RECRUNCH20</span>
+              </div>
+              <button onClick={() => navigate('shop')} className="bg-slate-900 text-white font-black text-2xl uppercase px-12 py-6 rounded-2xl shadow-[8px_8px_0_#f97316] hover:-translate-y-2 transition-all">Shop Next Order Now 👉</button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const RewardsView = () => {
+    // Determine tier based on points dynamically
+    const nextTier = 1000;
+    const progress = Math.min(100, (crownPoints / nextTier) * 100);
+    const tierName = crownPoints >= 1000 ? 'Raja 👑' : 'Minister';
+    
+    // --- MINI-GAME STATE (SNACK MATCH) ---
+    const SNACK_EMOJIS = ['🍟', '🍬', '🥜', '🥨'];
+    const [gameState, setGameState] = useState('idle'); // idle, playing, won, lost
+    const [cards, setCards] = useState([]);
+    const [flippedIdxs, setFlippedIdxs] = useState([]);
+    const [matchedPairs, setMatchedPairs] = useState(0);
+    const [timeLeft, setTimeLeft] = useState(20);
+
+    const startGame = () => {
+      // Create deck and shuffle
+      const deck = [...SNACK_EMOJIS, ...SNACK_EMOJIS]
+        .sort(() => Math.random() - 0.5)
+        .map((emoji, idx) => ({ id: idx, emoji, isFlipped: false, isMatched: false }));
+      setCards(deck);
+      setFlippedIdxs([]);
+      setMatchedPairs(0);
+      setTimeLeft(20);
+      setGameState('playing');
+    };
+
+    // Timer Effect for mini-game
+    useEffect(() => {
+      let timer;
+      if (gameState === 'playing' && timeLeft > 0) {
+        timer = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
+      } else if (gameState === 'playing' && timeLeft === 0) {
+        setGameState('lost');
+      }
+      return () => clearTimeout(timer);
+    }, [timeLeft, gameState]);
+
+    // Handle Card Click for mini-game
+    const handleCardClick = (idx) => {
+      // Prevent flipping if game is over, card is already flipped, matched, or 2 cards are currently flipping
+      if (gameState !== 'playing' || cards[idx].isFlipped || cards[idx].isMatched || flippedIdxs.length >= 2) return;
+
+      const newFlipped = [...flippedIdxs, idx];
+      setFlippedIdxs(newFlipped);
+
+      // Optimistically flip the card
+      const newCards = [...cards];
+      newCards[idx].isFlipped = true;
+      setCards(newCards);
+
+      // Check for match if 2 cards are flipped
+      if (newFlipped.length === 2) {
+        const [firstIdx, secondIdx] = newFlipped;
+        
+        if (newCards[firstIdx].emoji === newCards[secondIdx].emoji) {
+          // MATCH!
+          setTimeout(() => {
+            const matchedCards = [...newCards];
+            matchedCards[firstIdx].isMatched = true;
+            matchedCards[secondIdx].isMatched = true;
+            setCards(matchedCards);
+            setFlippedIdxs([]);
+            
+            setMatchedPairs(prev => {
+              const newPairs = prev + 1;
+              if (newPairs === SNACK_EMOJIS.length) {
+                setGameState('won');
+                setCrownPoints(p => p + 50); // Award 50 points to global balance!
+              }
+              return newPairs;
+            });
+          }, 500);
+        } else {
+          // NO MATCH, flip back
+          setTimeout(() => {
+            const resetCards = [...newCards];
+            resetCards[firstIdx].isFlipped = false;
+            resetCards[secondIdx].isFlipped = false;
+            setCards(resetCards);
+            setFlippedIdxs([]);
+          }, 800);
+        }
+      }
+    };
+
+    return (
+      <div className="bg-[#FFFBF0] min-h-screen py-12 px-6 animate-fade-in relative pattern-bg">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16 relative">
+             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-8xl animate-pulse-slow opacity-20 filter drop-shadow-[4px_4px_0_#000]">👑</div>
+             <h1 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter uppercase drop-shadow-[4px_4px_0_#eab308] relative z-10">Crown Club</h1>
+             <p className="text-2xl font-bold text-slate-700 mt-4 bg-white inline-block px-6 py-2 rounded-full border-4 border-slate-900 shadow-[4px_4px_0_#000] relative z-10">Earn snacks while you eat snacks.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <div className="md:col-span-2 bg-yellow-300 border-4 border-slate-900 rounded-[3rem] p-10 shadow-[12px_12px_0_#000]">
+              <div className="flex justify-between items-start mb-8">
+                <div>
+                  <p className="text-xl font-black uppercase tracking-widest text-slate-700">Your Balance</p>
+                  <div className="flex items-end gap-3"><span className="text-8xl font-black text-slate-900 tracking-tighter drop-shadow-[3px_3px_0_#fff]">{crownPoints}</span><span className="text-3xl font-black pb-2">Crowns 👑</span></div>
+                </div>
+                <div className="bg-white border-4 border-slate-900 px-4 py-2 rounded-xl font-black text-xl shadow-[4px_4px_0_#000] transform rotate-3">Tier: {tierName}</div>
+              </div>
+              <div className="mb-4">
+                <div className="flex justify-between font-black uppercase mb-2"><span>Current: {tierName}</span><span>Next: Raja ({nextTier} C)</span></div>
+                <div className="h-6 w-full bg-white rounded-full border-4 border-slate-900 overflow-hidden"><div className="h-full bg-orange-500 border-r-4 border-slate-900 transition-all duration-1000" style={{ width: `${progress}%` }}></div></div>
+                <p className="font-bold text-slate-700 mt-3 text-sm">Earn {Math.max(0, nextTier - crownPoints)} more Crowns to unlock FREE SHIPPING for life! 🚀</p>
+              </div>
+            </div>
+            <div className="bg-white border-4 border-slate-900 rounded-[3rem] p-8 shadow-[12px_12px_0_#000] flex flex-col justify-center">
+              <h3 className="text-2xl font-black uppercase mb-6 border-b-4 border-slate-900 pb-2">How to Earn</h3>
+              <ul className="space-y-4 font-bold text-lg text-slate-700">
+                <li className="flex items-center gap-3"><ShoppingBag className="w-6 h-6 text-orange-500"/> 1 Crown per ₹1 spent</li>
+                <li className="flex items-center gap-3"><Star className="w-6 h-6 text-yellow-500 fill-current"/> +50 C for reviewing</li>
+                <li className="flex items-center gap-3"><User className="w-6 h-6 text-purple-500"/> +200 C Referral Bonus</li>
+              </ul>
+              <button onClick={() => navigate('shop')} className="mt-8 bg-slate-900 text-white font-black uppercase py-4 rounded-xl border-4 border-slate-900 shadow-[6px_6px_0_#f97316] hover:-translate-y-1 transition-transform w-full">Shop to Earn</button>
+            </div>
+          </div>
+
+          {/* --- THE CROWN CLUB MINI GAME --- */}
+          <div className="bg-teal-300 border-4 border-slate-900 rounded-[3rem] p-8 md:p-10 shadow-[12px_12px_0_#000] mb-12 relative overflow-hidden">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-3xl font-black uppercase text-slate-900 drop-shadow-[2px_2px_0_#fff] flex items-center gap-3">
+                <Gamepad2 className="w-8 h-8" /> Snack Match 
+              </h3>
+              {gameState === 'playing' && <div className="bg-white border-4 border-slate-900 px-4 py-2 rounded-xl font-black text-xl shadow-[4px_4px_0_#000] animate-pulse">⏳ {timeLeft}s</div>}
+            </div>
+
+            {gameState === 'idle' && (
+              <div className="text-center py-10 bg-white/50 backdrop-blur-sm rounded-2xl border-4 border-slate-900">
+                <span className="text-6xl mb-4 block">🃏</span>
+                <p className="text-2xl font-black uppercase mb-2">Match 4 pairs in 20 seconds!</p>
+                <p className="font-bold text-slate-700 mb-6">Win 50 Crowns to use on your next order.</p>
+                <button onClick={startGame} className="bg-orange-500 text-white font-black text-2xl uppercase px-10 py-4 rounded-xl border-4 border-slate-900 shadow-[6px_6px_0_#000] hover:-translate-y-1 transition-all">Play Now ▶️</button>
+              </div>
+            )}
+
+            {gameState === 'playing' && (
+              <div className="grid grid-cols-4 gap-3 sm:gap-6 max-w-md mx-auto">
+                {cards.map((card, idx) => (
+                   <button
+                     key={idx}
+                     onClick={() => handleCardClick(idx)}
+                     className={`aspect-square text-4xl sm:text-5xl flex items-center justify-center rounded-2xl border-4 border-slate-900 transition-all transform ${card.isFlipped || card.isMatched ? 'bg-white shadow-[inset_4px_4px_0_#cbd5e1]' : 'bg-yellow-300 shadow-[4px_4px_0_#000] hover:bg-yellow-400 hover:-translate-y-1'}`}
+                   >
+                     {(card.isFlipped || card.isMatched) ? card.emoji : '?'}
+                   </button>
+                ))}
+              </div>
+            )}
+
+            {(gameState === 'won' || gameState === 'lost') && (
+              <div className="text-center py-10 bg-white/90 backdrop-blur-md rounded-2xl border-4 border-slate-900">
+                <span className="text-6xl mb-4 block">{gameState === 'won' ? '🎉' : '😭'}</span>
+                <p className="text-3xl font-black uppercase mb-2">
+                  {gameState === 'won' ? 'You Won 50 Crowns!' : 'Time Out!'}
+                </p>
+                <p className="font-bold text-slate-700 mb-6">
+                  {gameState === 'won' ? 'Points have been added to your balance above.' : 'Too slow. Better luck next time!'}
+                </p>
+                <button onClick={startGame} className="bg-slate-900 text-white font-black text-xl uppercase px-8 py-3 rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_#f97316] hover:-translate-y-1 transition-all">Play Again</button>
+              </div>
+            )}
+          </div>
+          {/* --------------------------------- */}
+
+          <h2 className="text-4xl font-black text-slate-900 uppercase mb-8 drop-shadow-[2px_2px_0_#fff]">Redeem Crowns 🎁</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-orange-100 border-4 border-slate-900 rounded-3xl p-6 shadow-[6px_6px_0_#000] flex flex-col items-center text-center hover:-translate-y-2 transition-transform cursor-pointer">
+              <div className="bg-white p-4 rounded-full border-4 border-slate-900 shadow-[4px_4px_0_#000] mb-4"><Ticket className="w-8 h-8 text-orange-600"/></div>
+              <h3 className="text-2xl font-black uppercase mb-2">₹100 OFF</h3><p className="font-bold text-slate-600 mb-4">Any order over ₹500</p><button className="bg-slate-900 text-white w-full font-black uppercase py-3 rounded-xl">Redeem 500 C</button>
+            </div>
+            <div className="bg-pink-100 border-4 border-slate-900 rounded-3xl p-6 shadow-[6px_6px_0_#000] flex flex-col items-center text-center hover:-translate-y-2 transition-transform cursor-pointer opacity-60">
+              <div className="bg-white p-4 rounded-full border-4 border-slate-900 shadow-[4px_4px_0_#000] mb-4"><Unlock className="w-8 h-8 text-pink-600"/></div>
+              <h3 className="text-2xl font-black uppercase mb-2">Secret Snack</h3><p className="font-bold text-slate-600 mb-4">Unlock limited edition flavors</p><button className="bg-slate-300 text-slate-600 w-full font-black uppercase py-3 rounded-xl border-4 border-slate-900" disabled>Need 1000 C</button>
+            </div>
+            <div className="bg-teal-100 border-4 border-slate-900 rounded-3xl p-6 shadow-[6px_6px_0_#000] flex flex-col items-center text-center hover:-translate-y-2 transition-transform cursor-pointer opacity-60">
+              <div className="bg-white p-4 rounded-full border-4 border-slate-900 shadow-[4px_4px_0_#000] mb-4"><Truck className="w-8 h-8 text-teal-600"/></div>
+              <h3 className="text-2xl font-black uppercase mb-2">Free Delivery</h3><p className="font-bold text-slate-600 mb-4">No minimum order value</p><button className="bg-slate-300 text-slate-600 w-full font-black uppercase py-3 rounded-xl border-4 border-slate-900" disabled>Need 2000 C</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const TrackOrderView = () => {
+    const [searchInput, setSearchInput] = useState(latestOrderId || '');
+    const [trackState, setTrackState] = useState('idle');
+    const [currentStep, setCurrentStep] = useState(0);
+    const handleTrack = (e) => { e.preventDefault(); if(!searchInput.trim()) return; setTrackState('loading'); setTimeout(() => { const isNew = searchInput === latestOrderId; setCurrentStep(isNew ? 1 : Math.floor(Math.random() * 5)); setTrackState('found'); }, 1500); };
+    const STEPS = [ { title: 'Order Placed', desc: 'We received your order.', icon: <CheckCircle className="w-6 h-6"/>, color: 'bg-green-400' }, { title: 'Packed with Love', desc: 'Snacks securely boxed.', icon: <Package className="w-6 h-6"/>, color: 'bg-pink-400' }, { title: 'Shipped', desc: 'Handed over to delivery partner.', icon: <Truck className="w-6 h-6"/>, color: 'bg-blue-400' }, { title: 'Out for Delivery', desc: 'Arriving today!', icon: <Navigation className="w-6 h-6"/>, color: 'bg-yellow-400' }, { title: 'Delivered', desc: 'Enjoy your snacks!', icon: <Crown className="w-6 h-6"/>, color: 'bg-orange-500' }, ];
+    return (
+      <div className="bg-[#FFFBF0] min-h-[80vh] py-12 px-6 animate-fade-in relative pattern-bg">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12"><h1 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter uppercase drop-shadow-[4px_4px_0_#2dd4bf]">Track Order 🚚</h1></div>
+          <div className="bg-white border-4 border-slate-900 rounded-[3rem] p-8 md:p-12 shadow-[16px_16px_0_#000]">
+            <form onSubmit={handleTrack} className="flex flex-col md:flex-row gap-4 mb-12"><input type="text" value={searchInput} onChange={(e) => setSearchInput(e.target.value.toUpperCase())} placeholder="Order ID (e.g., MRJ1234)" className="flex-grow bg-slate-50 border-4 border-slate-900 rounded-2xl px-6 py-5 text-2xl font-black focus:outline-none focus:bg-white focus:shadow-[6px_6px_0_#2dd4bf] transition-all uppercase placeholder:text-slate-400" /><button type="submit" className="bg-teal-400 text-slate-900 font-black text-2xl uppercase px-10 py-5 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_#000] hover:-translate-y-1 hover:shadow-[10px_10px_0_#000] transition-all">Track It 🔍</button></form>
+            {trackState === 'loading' && ( <div className="text-center py-20 flex flex-col items-center"><Truck className="w-20 h-20 text-teal-400 animate-bounce drop-shadow-[4px_4px_0_#000] mb-6" /><h3 className="text-3xl font-black uppercase tracking-widest text-slate-900 animate-pulse">Locating Package...</h3></div> )}
+            {trackState === 'found' && (
+              <div className="animate-fade-in">
+                <div className="flex justify-between items-center bg-slate-100 p-6 rounded-2xl border-4 border-slate-900 mb-10 shadow-[6px_6px_0_#000]"><div><p className="text-sm font-bold text-slate-500 uppercase">Order ID</p><p className="text-2xl font-black text-slate-900">{searchInput}</p></div><div className="text-right"><p className="text-sm font-bold text-slate-500 uppercase">Estimated Delivery</p><p className="text-2xl font-black text-teal-600 drop-shadow-[1px_1px_0_#000]">{currentStep === 4 ? 'Delivered' : 'Tomorrow, 2:00 PM'}</p></div></div>
+                <div className="relative pl-6 md:pl-10 space-y-12">
+                  <div className="absolute top-4 left-11 md:left-[3.25rem] w-2 h-[calc(100%-4rem)] bg-slate-200 rounded-full border-2 border-slate-900"><div className="w-full bg-teal-400 rounded-full transition-all duration-1000 border-r-2 border-slate-900" style={{ height: `${(currentStep / (STEPS.length - 1)) * 100}%` }}></div></div>
+                  {STEPS.map((step, index) => { const isActive = index <= currentStep; const isLastActive = index === currentStep; return ( <div key={index} className={`relative flex items-center gap-6 md:gap-10 transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-40 grayscale'}`}><div className={`z-10 w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-slate-900 flex items-center justify-center flex-shrink-0 transition-transform ${isActive ? step.color : 'bg-slate-100 text-slate-400'} ${isLastActive ? 'scale-125 shadow-[4px_4px_0_#000] ring-4 ring-teal-200' : isActive ? 'shadow-[2px_2px_0_#000]' : ''}`}>{isActive ? <span className="text-slate-900">{step.icon}</span> : <Clock className="w-5 h-5"/>}</div><div className={`flex-grow bg-white p-6 rounded-2xl border-4 border-slate-900 transition-transform ${isLastActive ? 'shadow-[6px_6px_0_#2dd4bf] -translate-y-1' : isActive ? 'shadow-[4px_4px_0_#000]' : ''}`}><h3 className={`text-2xl font-black uppercase ${isLastActive ? 'text-teal-600' : 'text-slate-900'}`}>{step.title}</h3><p className="text-lg font-bold text-slate-600 mt-1">{step.desc}</p></div></div> ) })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const Footer = () => (
+    <footer className="bg-slate-900 text-white pt-24 pb-12 px-6 relative overflow-hidden border-t-8 border-orange-500">
+      <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0]"><svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-[60px]"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#f97316"></path></svg></div>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 relative z-10 mt-10">
+        <div>
+          <div className="text-5xl font-black tracking-tighter text-white flex items-center mb-6 drop-shadow-[4px_4px_0_#f97316]">M<span className="relative inline-block mx-[2px] text-orange-500">O<Crown className="absolute -top-6 left-1/2 -translate-x-1/2 w-8 h-8 text-red-500" strokeWidth={3}/></span>MRAJ</div>
+          <p className="font-bold text-xl text-slate-300">Authentic flavors. Gen Z swagger. 👑</p>
+        </div>
+        <div>
+          <h4 className="font-black text-2xl mb-6 uppercase text-yellow-300 border-b-4 border-yellow-300 inline-block pb-2">Quick Hit</h4>
+          <ul className="space-y-4 font-bold text-lg">
+            <li><button onClick={() => navigate('tracking')} className="hover:text-teal-400 hover:translate-x-2 transition-transform flex items-center gap-2">🚚 Track Order</button></li>
+            <li><button onClick={() => navigate('custom-hamper')} className="hover:text-purple-400 hover:translate-x-2 transition-transform flex items-center gap-2">🎁 Build Custom Hamper</button></li>
+            <li><button onClick={() => navigate('rewards')} className="hover:text-yellow-400 hover:translate-x-2 transition-transform flex items-center gap-2">👑 Crown Club Rewards</button></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#FFFBF0] font-sans text-slate-900 selection:bg-orange-300 flex flex-col overflow-x-hidden">
+      <Header />
+      <main className="flex-grow">
+        {currentPage === 'home' && <HomeView />}
+        {currentPage === 'shop' && <ShopView />}
+        {currentPage === 'product' && <ProductDetailView />}
+        {currentPage === 'cart' && <CartView />}
+        {currentPage === 'checkout' && <CheckoutView />}
+        {currentPage === 'success' && <SuccessView />}
+        {currentPage === 'tracking' && <TrackOrderView />}
+        {currentPage === 'rewards' && <RewardsView />}
+        {currentPage === 'gifting' && <HomeView />} 
+        {currentPage === 'custom-hamper' && <HomeView />}
+        {currentPage === 'wishlist' && <HomeView />}
+      </main>
+      <Footer />
+      
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fade-in { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes image-swipe { 0% { opacity: 0.5; transform: scale(1.05) translateX(10px); } 100% { opacity: 1; transform: scale(1.1) translateX(0); } }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes ping-once { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0) rotate(0); } 20%, 60% { transform: translateX(-10px) rotate(-10deg); } 40%, 80% { transform: translateX(10px) rotate(10deg); } }
+        @keyframes pop { 0% { opacity: 0; transform: scale(0.5); } 80% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+        .animate-image-swipe { animation: image-swipe 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-marquee { display: inline-flex; width: max-content; animation: marquee 20s linear infinite; }
+        .animate-ping-once { animation: ping-once 0.3s ease-out; }
+        .animate-shake { animation: shake 0.5s ease-in-out infinite; }
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        .pattern-bg { background-color: #FFFBF0; background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px); background-size: 30px 30px; }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-3d { transform-style: preserve-3d; }
+      `}} />
+    </div>
+  );
+}
